@@ -1,0 +1,51 @@
+{
+  "name": "rubiks-cube",
+  "version": "1.0.0",
+  "description": "Interactive Rubik's Cube using Three.js and React",
+  "main": "index.js",
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "react-scripts eject",
+    "deploy": "node deploy.js",
+    "serve": "npx serve -s build",
+    "log-server": "node log-server.js",
+    "monitor-logs": "node monitor-logs.js",
+    "dev": "concurrently \"npm run log-server\" \"npm start\""
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.15.12",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "^5.0.1",
+    "styled-components": "^6.1.1",
+    "three": "^0.160.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
+    "@svgr/webpack": "^8.1.0",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "webpack-dev-server": "^5.2.2"
+  },
+  "overrides": {
+    "nth-check": ">=2.0.1",
+    "css-select": ">=4.0.0",
+    "svgo": ">=2.0.0"
+  }
+}
