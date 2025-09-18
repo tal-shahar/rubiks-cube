@@ -1,0 +1,68 @@
+# === General Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === Build outputs (global) ===
+dist/
+build/
+.cache/
+.next/
+out/
+
+# === Environment files (keep secrets out) ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === Logs ===
+logs/
+*.log
+*.log.*
+*.out
+*.pid
+*.seed
+*.pid.lock
+
+# === IDE / Editor ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.sw?
+
+# === System files ===
+.DS_Store
+Thumbs.db
+
+# === Coverage & Testing ===
+coverage/
+.nyc_output/
+jest-html-reporters-*
+cypress/videos/
+cypress/screenshots/
+
+# === Misc ===
+*.tgz
+*.bak
+*.tmp
+*.temp
+
+
+# ====== CLIENT (React frontend) ======
+client/node_modules/
+client/build/
+client/.cache/
+client/.next/
+client/out/
+
+
+# ====== SERVER (Node/Express backend) ======
+server/node_modules/
+server/dist/
+server/build/
