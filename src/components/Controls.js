@@ -191,21 +191,21 @@ function Controls({
   };
 
   const handleFaceRotation = (face, direction) => {
-    console.log(`🔵 handleFaceRotation called: ${face} ${direction}`);
-    console.log(`🔵 isAnimating: ${isAnimating}`);
-    console.log(`🔵 onRotateFace exists: ${!!onRotateFace}`);
+    // console.log(`🔵 handleFaceRotation called: ${face} ${direction}`);
+    // console.log(`🔵 isAnimating: ${isAnimating}`);
+    // console.log(`🔵 onRotateFace exists: ${!!onRotateFace}`);
     
     if (isAnimating) {
-      console.log(`🔵 BLOCKED: Animation in progress`);
+      // console.log(`🔵 BLOCKED: Animation in progress`);
       return;
     }
     
     if (!onRotateFace) {
-      console.log(`🔵 BLOCKED: onRotateFace function not available`);
+      // console.log(`🔵 BLOCKED: onRotateFace function not available`);
       return;
     }
     
-    console.log(`🔵 Calling onRotateFace: ${face} ${direction}`);
+    // console.log(`🔵 Calling onRotateFace: ${face} ${direction}`);
     onRotateFace(face, direction);
   };
 
@@ -325,6 +325,15 @@ function Controls({
   return (
     <ControlsContainer>
       <ButtonGroup>
+        <Label>Quick Test:</Label>
+        <FaceButtonGroup>
+          <RButton onClick={() => handleFaceRotation('R', 'clockwise')} style={{ fontSize: '16px', padding: '12px 16px', margin: '5px' }}>
+            R
+          </RButton>
+        </FaceButtonGroup>
+      </ButtonGroup>
+
+      <ButtonGroup>
         <Label>Auto Rotate:</Label>
         <ToggleButton
           $active={autoRotate}
@@ -347,9 +356,9 @@ function Controls({
       <ButtonGroup>
         <Label>Face Rotations:</Label>
         <FaceButtonGroup>
+          <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
           <FButton onClick={() => handleFaceRotation('F', 'clockwise')}>F</FButton>
           <BButton onClick={() => handleFaceRotation('B', 'clockwise')}>B</BButton>
-          <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
           <LButton onClick={() => handleFaceRotation('L', 'clockwise')}>L</LButton>
           <UButton onClick={() => handleFaceRotation('U', 'clockwise')}>U</UButton>
           <DButton onClick={() => handleFaceRotation('D', 'clockwise')}>D</DButton>
@@ -359,9 +368,9 @@ function Controls({
       <ButtonGroup>
         <Label>Counter-Clockwise:</Label>
         <FaceButtonGroup>
+          <RButton onClick={() => handleFaceRotation('R', 'counterclockwise')}>R'</RButton>
           <FButton onClick={() => handleFaceRotation('F', 'counterclockwise')}>F'</FButton>
           <BButton onClick={() => handleFaceRotation('B', 'counterclockwise')}>B'</BButton>
-          <RButton onClick={() => handleFaceRotation('R', 'counterclockwise')}>R'</RButton>
           <LButton onClick={() => handleFaceRotation('L', 'counterclockwise')}>L'</LButton>
           <UButton onClick={() => handleFaceRotation('U', 'counterclockwise')}>U'</UButton>
           <DButton onClick={() => handleFaceRotation('D', 'counterclockwise')}>D'</DButton>

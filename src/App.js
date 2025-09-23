@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import RubiksCube from './components/RubiksCube';
+import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
 import IdentifyIncorrectShapes from './components/IdentifyIncorrectShapes';
@@ -94,79 +94,79 @@ function App() {
   };
 
   const handleRotateFace = (face, direction) => {
-    console.log('🎯 handleRotateFace called with:', face, direction);
-    console.log('🎯 rotateFaceRef.current:', rotateFaceRef.current);
+    // console.log('🎯 handleRotateFace called with:', face, direction);
+    // console.log('🎯 rotateFaceRef.current:', rotateFaceRef.current);
     if (rotateFaceRef.current) {
-      console.log('🎯 Calling rotateFaceRef.current with:', face, direction);
+      // console.log('🎯 Calling rotateFaceRef.current with:', face, direction);
       try {
         rotateFaceRef.current(face, direction);
-        console.log('🎯 rotateFaceRef.current call completed successfully');
+        // console.log('🎯 rotateFaceRef.current call completed successfully');
       } catch (error) {
-        console.log('🎯 ERROR calling rotateFaceRef.current:', error);
+        // console.log('🎯 ERROR calling rotateFaceRef.current:', error);
       }
     } else {
-      console.log('🎯 ERROR: rotateFaceRef.current is null!');
+      // console.log('🎯 ERROR: rotateFaceRef.current is null!');
     }
   };
 
   // Add keyboard event handling
   useEffect(() => {
     const handleKeyDown = (event) => {
-      console.log('🔑 Keyboard event detected:', event.key, event.shiftKey);
+      // console.log('🔑 Keyboard event detected:', event.key, event.shiftKey);
       
       // Prevent default behavior for cube rotation keys
       const rotationKeys = ['r', 'l', 'u', 'd', 'f', 'b'];
       if (rotationKeys.includes(event.key.toLowerCase())) {
         event.preventDefault();
-        console.log('🔑 Prevented default for key:', event.key);
+        // console.log('🔑 Prevented default for key:', event.key);
       }
 
       // Determine direction based on shift key
       const direction = event.shiftKey ? 'counterclockwise' : 'clockwise';
-      console.log('🔑 Direction determined:', direction);
+      // console.log('🔑 Direction determined:', direction);
 
       // Handle cube rotation keys
       switch (event.key.toLowerCase()) {
         case 'r':
-          console.log('🔑 R key pressed - calling handleRotateFace');
+          // console.log('🔑 R key pressed - calling handleRotateFace');
           handleRotateFace('R', direction);
           break;
         case 'l':
-          console.log('🔑 L key pressed - calling handleRotateFace');
+          // console.log('🔑 L key pressed - calling handleRotateFace');
           handleRotateFace('L', direction);
           break;
         case 'u':
-          console.log('🔑 U key pressed - calling handleRotateFace');
+          // console.log('🔑 U key pressed - calling handleRotateFace');
           handleRotateFace('U', direction);
           break;
         case 'd':
-          console.log('🔑 D key pressed - calling handleRotateFace');
+          // console.log('🔑 D key pressed - calling handleRotateFace');
           handleRotateFace('D', direction);
           break;
         case 'f':
-          console.log('🔑 F key pressed - calling handleRotateFace');
+          // console.log('🔑 F key pressed - calling handleRotateFace');
           handleRotateFace('F', direction);
           break;
         case 'b':
-          console.log('🔑 B key pressed - calling handleRotateFace');
-          console.log('🔑 B key - direction:', direction);
-          console.log('🔑 B key - rotateFaceRef.current:', !!rotateFaceRef.current);
+          // console.log('🔑 B key pressed - calling handleRotateFace');
+          // console.log('🔑 B key - direction:', direction);
+          // console.log('🔑 B key - rotateFaceRef.current:', !!rotateFaceRef.current);
           handleRotateFace('B', direction);
           break;
         default:
-          console.log('🔑 Key not recognized:', event.key);
+          // console.log('🔑 Key not recognized:', event.key);
           break;
       }
     };
 
     // Add event listener
     window.addEventListener('keydown', handleKeyDown);
-    console.log('🔑 Keyboard event listener added');
+    // console.log('🔑 Keyboard event listener added');
 
     // Cleanup
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      console.log('🔑 Keyboard event listener removed');
+      // console.log('🔑 Keyboard event listener removed');
     };
   }, []);
 
@@ -176,22 +176,22 @@ function App() {
     setHighlightedPieces([]);
     
     // Log identification results to main development terminal
-    console.log('\n' + '🔍'.repeat(50));
-    console.log(`🎯 IDENTIFICATION RESULT IN MAIN TERMINAL!`);
-    console.log(`📊 Type: ${identificationResult.type}`);
+    // console.log('\n' + '🔍'.repeat(50));
+    // console.log(`🎯 IDENTIFICATION RESULT IN MAIN TERMINAL!`);
+    // console.log(`📊 Type: ${identificationResult.type}`);
     
     if (identificationResult.type === 'piece') {
-      console.log(`🆔 Piece ID: ${identificationResult.pieceId}`);
-      console.log(`🎨 Shape: ${identificationResult.shapeColor} ${identificationResult.shapeType}`);
-      console.log(`📍 Current Position: [${identificationResult.currentPosition.join(', ')}]`);
-      console.log(`🎯 Expected Position: [${identificationResult.expectedPosition.join(', ')}]`);
-      console.log(`✅ Is Correct: ${identificationResult.isInCorrectPosition}`);
-      console.log(`🎭 Expected Border Colors:`, identificationResult.expectedBorderColors);
-      console.log(`📊 Move History: ${identificationResult.rotationHistory.length} moves`);
+      // console.log(`🆔 Piece ID: ${identificationResult.pieceId}`);
+      // console.log(`🎨 Shape: ${identificationResult.shapeColor} ${identificationResult.shapeType}`);
+      // console.log(`📍 Current Position: [${identificationResult.currentPosition.join(', ')}]`);
+      // console.log(`🎯 Expected Position: [${identificationResult.expectedPosition.join(', ')}]`);
+      // console.log(`✅ Is Correct: ${identificationResult.isInCorrectPosition}`);
+      // console.log(`🎭 Expected Border Colors:`, identificationResult.expectedBorderColors);
+      // console.log(`📊 Move History: ${identificationResult.rotationHistory.length} moves`);
     } else if (identificationResult.type === 'combination') {
-      console.log(`🎯 Combination: ${identificationResult.combination.shapeColor} ${identificationResult.combination.shapeType} with ${identificationResult.combination.borderColor} border`);
-      console.log(`🔢 Count: ${identificationResult.count} incorrect pieces found`);
-      console.log(`📋 Incorrect Pieces:`, identificationResult.incorrectPieces);
+      // console.log(`🎯 Combination: ${identificationResult.combination.shapeColor} ${identificationResult.combination.shapeType} with ${identificationResult.combination.borderColor} border`);
+      // console.log(`🔢 Count: ${identificationResult.count} incorrect pieces found`);
+      // console.log(`📋 Incorrect Pieces:`, identificationResult.incorrectPieces);
     } else if (identificationResult.type === 'blackFaces') {
       console.log(`⚫ BLACK FACES IDENTIFIED: ${identificationResult.count} pieces with visible black faces found`);
       console.log(`🔢 TOTAL BLACK FACES: ${identificationResult.totalBlackFaces} individual faces painted pink`);

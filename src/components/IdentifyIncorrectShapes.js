@@ -238,7 +238,7 @@ function IdentifyIncorrectShapes({ isScrambling, cubeState, onIdentification, se
   const [identificationResults, setIdentificationResults] = useState({});
 
   if (!cubeState) {
-    console.log('🚨 SHOWING LOADING MESSAGE - no cubeState');
+    // console.log('🚨 SHOWING LOADING MESSAGE - no cubeState');
     return (
       <IdentifyContainer>
         <SectionTitle>Identify Incorrect Shapes</SectionTitle>
@@ -775,16 +775,13 @@ function IdentifyIncorrectShapes({ isScrambling, cubeState, onIdentification, se
     logToTerminal('🔧 FOUND AND FIXING GRAY FACES:', blackFacesResult.incorrectPieces.length, 'pieces');
     logToTerminal('🔧 Pieces to fix:', blackFacesResult.incorrectPieces.map(p => `${p.pieceId} at [${p.currentPosition.join(', ')}]`));
 
-    // Update the cube state to fix the colors using CubeStateManager
-    if (typeof window !== 'undefined' && window.CubeStateManager) {
-      logToTerminal('🔧 Using CubeStateManager to update cube state');
-      // Get current state without triggering reinitialization
-      const currentState = window.CubeStateManager.state || cubeState;
-      logToTerminal('🔧 Current state length:', currentState.length);
-      
-      window.CubeStateManager.setState(prevState => {
-        logToTerminal('🔧 CubeStateManager setState called with prevState length:', prevState.length);
-        const newState = [...prevState];
+    // Update the cube state to fix the colors using React state management
+    logToTerminal('🔧 Using React setCubeState to update cube state');
+    logToTerminal('🔧 Current state length:', cubeState.length);
+    
+    setCubeState(prevState => {
+      logToTerminal('🔧 setCubeState called with prevState length:', prevState.length);
+      const newState = [...prevState];
         
         blackFacesResult.incorrectPieces.forEach(incorrectPiece => {
           logToTerminal(`🔧 Processing piece ${incorrectPiece.pieceId}...`);
@@ -855,91 +852,10 @@ function IdentifyIncorrectShapes({ isScrambling, cubeState, onIdentification, se
           }
         });
         
-        logToTerminal('✅ Gray faces find and fix completed!');
-        logToTerminal('🔧 New state length:', newState.length);
-        return newState;
-      });
-    } else {
-      // Fallback to the passed setCubeState function
-      logToTerminal('🔧 Using fallback setCubeState method');
-      setCubeState(prevState => {
-        logToTerminal('🔧 setCubeState called with prevState length:', prevState.length);
-        const newState = [...prevState];
-        
-        blackFacesResult.incorrectPieces.forEach(incorrectPiece => {
-          logToTerminal(`🔧 Processing piece ${incorrectPiece.pieceId}...`);
-          const pieceIndex = newState.findIndex(p => p.pieceId === incorrectPiece.pieceId);
-          logToTerminal(`🔧 Found piece at index ${pieceIndex}`);
-          
-          if (pieceIndex !== -1) {
-            const piece = newState[pieceIndex];
-            const [x, y, z] = piece.position;
-            logToTerminal(`🔧 Piece ${piece.pieceId} at position [${x}, ${y}, ${z}]`);
-            logToTerminal(`🔧 Current colors:`, piece.colors);
-            
-            // Determine which faces should be visible based on current position
-            const visibleFaces = [];
-            if (x === 1) visibleFaces.push('right');
-            if (x === -1) visibleFaces.push('left');
-            if (y === 1) visibleFaces.push('top');
-            if (y === -1) visibleFaces.push('bottom');
-            if (z === 1) visibleFaces.push('front');
-            if (z === -1) visibleFaces.push('back');
-            
-            logToTerminal(`🔧 Visible faces:`, visibleFaces);
-            
-            // Fix the colors for visible faces that are currently black/gray
-            const updatedColors = { ...piece.colors };
-            let fixedAny = false;
-            
-            visibleFaces.forEach(face => {
-              logToTerminal(`🔧 Checking face ${face}: current color = ${updatedColors[face]}`);
-              if (updatedColors[face] === '#444444' || updatedColors[face] === 'black' || updatedColors[face] === '#000000') {
-                // Set the correct color based on the face
-                switch (face) {
-                  case 'front':
-                    updatedColors[face] = '#FFFFFF'; // White
-                    break;
-                  case 'back':
-                    updatedColors[face] = '#FFD700'; // Yellow
-                    break;
-                  case 'right':
-                    updatedColors[face] = '#DC143C'; // Red
-                    break;
-                  case 'left':
-                    updatedColors[face] = '#FF8C00'; // Orange
-                    break;
-                  case 'top':
-                    updatedColors[face] = '#0000FF'; // Blue
-                    break;
-                  case 'bottom':
-                    updatedColors[face] = '#00FF00'; // Green
-                    break;
-                }
-                logToTerminal(`🔧 Fixed face ${face} to ${updatedColors[face]}`);
-                fixedAny = true;
-              }
-            });
-            
-            if (fixedAny) {
-              newState[pieceIndex] = {
-                ...piece,
-                colors: updatedColors
-              };
-              logToTerminal(`🔧 Updated piece ${piece.pieceId} with new colors:`, updatedColors);
-            } else {
-              logToTerminal(`🔧 No changes needed for piece ${piece.pieceId}`);
-            }
-          } else {
-            logToTerminal(`🔧 ERROR: Could not find piece ${incorrectPiece.pieceId} in cube state`);
-          }
-        });
-        
-        logToTerminal('✅ Gray faces find and fix completed!');
-        logToTerminal('🔧 New state length:', newState.length);
-        return newState;
-      });
-    }
+      logToTerminal('✅ Gray faces find and fix completed!');
+      logToTerminal('🔧 New state length:', newState.length);
+      return newState;
+    });
 
     // Clear the identification results since we've fixed the issue
     setIdentificationResults(prev => ({
