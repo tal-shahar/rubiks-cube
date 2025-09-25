@@ -35,19 +35,21 @@ function applyColorRotation(colors, face, direction) {
       break;
     case 'B': // Back face rotation (Z- plane)
       if (direction === 'clockwise') {
-        // Colors rotate clockwise: top->right, right->bottom, bottom->left, left->top
-        const temp = rotatedColors.top;
-        rotatedColors.top = rotatedColors.right;
-        rotatedColors.right = rotatedColors.bottom;
-        rotatedColors.bottom = rotatedColors.left;
-        rotatedColors.left = temp;
-      } else if (direction === 'counterclockwise') {
-        // Colors rotate counterclockwise: top->left, left->bottom, bottom->right, right->top
+        // Colors rotate clockwise: top->left, left->bottom, bottom->right, right->top
+        // (opposite to front face because back face is viewed from behind)
         const temp = rotatedColors.top;
         rotatedColors.top = rotatedColors.left;
         rotatedColors.left = rotatedColors.bottom;
         rotatedColors.bottom = rotatedColors.right;
         rotatedColors.right = temp;
+      } else if (direction === 'counterclockwise') {
+        // Colors rotate counterclockwise: top->right, right->bottom, bottom->left, left->top
+        // (opposite to front face because back face is viewed from behind)
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.right;
+        rotatedColors.right = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.left;
+        rotatedColors.left = temp;
       }
       break;
     case 'R': // Right face rotation (X+ plane)
@@ -71,17 +73,17 @@ function applyColorRotation(colors, face, direction) {
       if (direction === 'clockwise') {
         // Colors rotate clockwise: top->front, front->bottom, bottom->back, back->top
         const temp = rotatedColors.top;
-        rotatedColors.top = rotatedColors.back;
-        rotatedColors.back = rotatedColors.bottom;
-        rotatedColors.bottom = rotatedColors.front;
-        rotatedColors.front = temp;
-      } else if (direction === 'counterclockwise') {
-        // Colors rotate counterclockwise: top->back, back->bottom, bottom->front, front->top
-        const temp = rotatedColors.top;
         rotatedColors.top = rotatedColors.front;
         rotatedColors.front = rotatedColors.bottom;
         rotatedColors.bottom = rotatedColors.back;
         rotatedColors.back = temp;
+      } else if (direction === 'counterclockwise') {
+        // Colors rotate counterclockwise: top->back, back->bottom, bottom->front, front->top
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.back;
+        rotatedColors.back = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.front;
+        rotatedColors.front = temp;
       }
       break;
     case 'U': // Up face rotation (Y+ plane)
