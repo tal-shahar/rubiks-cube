@@ -5,6 +5,72 @@ import { getOriginalColors } from '../utils/colors';
 // Access CubeStateManager from window object (set by CubeStateProvider)
 const CubeStateManager = window.CubeStateManager;
 
+// Helper function to apply 3D position transformation
+function applyPositionTransformation(position, face, direction) {
+  const [x, y, z] = position;
+  let newX = x, newY = y, newZ = z;
+  
+  // Apply 3D transformation based on face
+  switch (face) {
+    case 'F': // Front face rotation (Z+ plane)
+      if (direction === 'clockwise') {
+        newX = -y;
+        newY = x;
+      } else if (direction === 'counterclockwise') {
+        newX = y;
+        newY = -x;
+      }
+      break;
+    case 'B': // Back face rotation (Z- plane)
+      if (direction === 'clockwise') {
+        newX = y;
+        newY = -x;
+      } else if (direction === 'counterclockwise') {
+        newX = -y;
+        newY = x;
+      }
+      break;
+    case 'R': // Right face rotation (X+ plane)
+      if (direction === 'clockwise') {
+        newY = -z;
+        newZ = y;
+      } else if (direction === 'counterclockwise') {
+        newY = z;
+        newZ = -y;
+      }
+      break;
+    case 'L': // Left face rotation (X- plane)
+      if (direction === 'clockwise') {
+        newY = z;
+        newZ = -y;
+      } else if (direction === 'counterclockwise') {
+        newY = -z;
+        newZ = y;
+      }
+      break;
+    case 'U': // Up face rotation (Y+ plane)
+      if (direction === 'clockwise') {
+        newX = z;
+        newZ = -x;
+      } else if (direction === 'counterclockwise') {
+        newX = -z;
+        newZ = x;
+      }
+      break;
+    case 'D': // Down face rotation (Y- plane)
+      if (direction === 'clockwise') {
+        newX = -z;
+        newZ = x;
+      } else if (direction === 'counterclockwise') {
+        newX = z;
+        newZ = -x;
+      }
+      break;
+  }
+  
+  return [newX, newY, newZ];
+}
+
 // Helper function to apply color rotation
 function applyColorRotation(colors, face, direction) {
   const rotatedColors = { ...colors };
@@ -183,72 +249,9 @@ export const applyRotation = (pieces, face, direction) => {
     // Debug: Log all pieces being processed
     console.log(`🎨 Processing piece ${piece.pieceId} for ${face} ${direction} rotation at position [${piece.position.join(', ')}]`);
     
+    // Apply 3D transformation based on face (only current rotation)
     const [x, y, z] = piece.position;
-    let newX = x, newY = y, newZ = z;
-    
-    // Apply 3D transformation based on face
-    switch (face) {
-      case 'F': // Front face rotation (Z+ plane)
-        if (direction === 'clockwise') {
-          newX = -y;
-          newY = x;
-        } else if (direction === 'counterclockwise') {
-          newX = y;
-          newY = -x;
-        }
-        // If direction is invalid, newX and newY remain unchanged
-        break;
-      case 'B': // Back face rotation (Z- plane)
-        if (direction === 'clockwise') {
-          newX = y;
-          newY = -x;
-        } else if (direction === 'counterclockwise') {
-          newX = -y;
-          newY = x;
-        }
-        // If direction is invalid, newX and newY remain unchanged
-        break;
-      case 'R': // Right face rotation (X+ plane)
-        if (direction === 'clockwise') {
-          newY = z;
-          newZ = -y;
-        } else if (direction === 'counterclockwise') {
-          newY = -z;
-          newZ = y;
-        }
-        // If direction is invalid, newY and newZ remain unchanged
-        break;
-      case 'L': // Left face rotation (X- plane)
-        if (direction === 'clockwise') {
-          newY = z;
-          newZ = -y;
-        } else if (direction === 'counterclockwise') {
-          newY = -z;
-          newZ = y;
-        }
-        // If direction is invalid, newY and newZ remain unchanged
-        break;
-      case 'U': // Up face rotation (Y+ plane)
-        if (direction === 'clockwise') {
-          newX = -z;
-          newZ = x;
-        } else if (direction === 'counterclockwise') {
-          newX = z;
-          newZ = -x;
-        }
-        // If direction is invalid, newX and newZ remain unchanged
-        break;
-      case 'D': // Down face rotation (Y- plane)
-        if (direction === 'clockwise') {
-          newX = -z;
-          newZ = x;
-        } else if (direction === 'counterclockwise') {
-          newX = z;
-          newZ = -x;
-        }
-        // If direction is invalid, newX and newZ remain unchanged
-        break;
-    }
+    const [newX, newY, newZ] = applyPositionTransformation(piece.position, face, direction);
     
     // console.log(`🔄 Piece ${piece.pieceId} moving from [${x}, ${y}, ${z}] to [${newX}, ${newY}, ${newZ}]`);
     
