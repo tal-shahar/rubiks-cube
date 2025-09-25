@@ -1,13 +1,53 @@
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useEffect } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { CubeStateProvider } from './state/CubeStateProvider';
 import { CubeGroup } from './components/CubeGroup';
 import { useRotation } from './hooks/useRotation';
 import { getOriginalColors, getStartingPositionColors } from './utils/colors';
 
+// Camera reset component
+const CameraReset = ({ onCameraReset }) => {
+  const { camera } = useThree();
+  
+  // Store initial camera position
+  const initialCameraPosition = [5, 5, 5];
+  const initialTarget = [0, 0, 0];
+  
+  // Expose camera reset function to parent
+  useEffect(() => {
+    if (onCameraReset) {
+      onCameraReset(() => {
+        console.log('Camera reset function called');
+        console.log('OrbitControls ref available:', !!window.orbitControlsRef);
+        
+        // Use a timeout to ensure the reset happens after the cube state reset
+        setTimeout(() => {
+          if (window.orbitControlsRef) {
+            console.log('Resetting camera position to:', initialCameraPosition);
+            console.log('Resetting camera target to:', initialTarget);
+            
+            // Reset camera position
+            camera.position.set(...initialCameraPosition);
+            // Reset controls target
+            window.orbitControlsRef.target.set(...initialTarget);
+            // Update controls
+            window.orbitControlsRef.update();
+            
+            console.log('Camera reset to initial position - COMPLETED');
+          } else {
+            console.log('OrbitControls ref not available for camera reset');
+          }
+        }, 100); // Small delay to ensure cube state reset completes first
+      });
+    }
+  }, [onCameraReset, camera]);
+  
+  return null; // This component doesn't render anything
+};
+
 // Main Rubik's Cube component
-export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, highlightedPieces = [] }) {
+export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, onResetRef, onGroupRef, onCameraReset }) {
   return (
     <Canvas
       camera={{ position: [5, 5, 5], fov: 50 }}
@@ -127,6 +167,13 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
             });
           };
 
+          // Expose reset function to parent component
+          useEffect(() => {
+            if (onResetRef) {
+              onResetRef.current = reset;
+            }
+          }, [onResetRef, reset]);
+
           // Generate optimal solve sequence using beginner's method
           const generateOptimalSolve = (moveHistory) => {
             // This is a simplified version - in reality, you'd use proper algorithms like CFOP
@@ -195,13 +242,25 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               onSolve={onSolve}
               onRotateFace={onRotateFace}
               onCubeStateChange={onCubeStateChange}
-              highlightedPieces={highlightedPieces}
+              onGroupRef={onGroupRef}
             />
           );
         }}
       </CubeStateProvider>
       
-      <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+      <CameraReset onCameraReset={onCameraReset} />
+      <OrbitControls 
+        ref={ref => {
+          // Store controls reference for camera reset
+          if (ref) {
+            window.orbitControlsRef = ref;
+            console.log('OrbitControls ref set:', ref);
+          }
+        }}
+        enablePan={true} 
+        enableZoom={true} 
+        enableRotate={true} 
+      />
       <Environment preset="sunset" />
     </Canvas>
   );

@@ -21,7 +21,7 @@ export function CubeGroup({
   onSolve, 
   onRotateFace, 
   onCubeStateChange, 
-  highlightedPieces = [] 
+  onGroupRef
 }) {
   // Debug: Log when CubeGroup receives new state
   // console.log('🎨 CubeGroup received state with', cubeState?.length || 0, 'pieces');
@@ -82,6 +82,14 @@ export function CubeGroup({
       onSolve(solve);
     }
   }, [rotateFace, scramble, reset, solve, onRotateFace, onScramble, onReset, onSolve]);
+
+  // Set up group ref callback
+  const setGroupRef = React.useCallback((ref) => {
+    groupRef.current = ref;
+    if (onGroupRef) {
+      onGroupRef(ref);
+    }
+  }, [onGroupRef]);
 
   // Helper functions for enhanced debugging
   const getShapeType = (pieceId) => {
@@ -174,7 +182,7 @@ export function CubeGroup({
   // Handle null/undefined cubeState
   if (!cubeState || !Array.isArray(cubeState)) {
     return (
-      <group ref={groupRef}>
+      <group ref={setGroupRef}>
         {/* Empty group for null/undefined cubeState */}
       </group>
     );
@@ -182,17 +190,6 @@ export function CubeGroup({
   
   cubeState.forEach((piece, index) => {
     const pieceId = piece.pieceId || index;
-    
-    // Find the highlighted piece data to get blackVisibleFaces
-    const highlightedPieceData = highlightedPieces.find(p => p.pieceId === pieceId);
-    const isHighlighted = !!highlightedPieceData;
-    
-    const highlightInfo = isHighlighted ? {
-      shapeType: getShapeType(pieceId),
-      shapeColor: getShapeColor(pieceId),
-      pieceId: pieceId,
-      blackVisibleFaces: highlightedPieceData ? highlightedPieceData.blackVisibleFaces : []
-    } : null;
 
     // Debug: Log what position we're passing to CubePiece - DISABLED
     // if (pieceId === 0 || pieceId === 17 || pieceId === 25) {
@@ -206,8 +203,6 @@ export function CubeGroup({
         position={piece.position}
         colors={piece.colors}
         pieceId={pieceId}
-        isHighlighted={isHighlighted}
-        highlightInfo={highlightInfo}
         rotatingFace={rotatingFace}
         rotationProgress={rotationProgress}
       />
@@ -233,7 +228,7 @@ export function CubeGroup({
   }
 
   return (
-    <group ref={groupRef}>
+    <group ref={setGroupRef}>
       {/* Non-rotating pieces */}
       {nonRotatingPieces}
       

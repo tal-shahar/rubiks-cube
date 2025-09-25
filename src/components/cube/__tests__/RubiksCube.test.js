@@ -112,8 +112,7 @@ describe('RubiksCube Component', () => {
     onReset: jest.fn(),
     onSolve: jest.fn(),
     onRotateFace: jest.fn(),
-    onCubeStateChange: jest.fn(),
-    highlightedPieces: []
+    onCubeStateChange: jest.fn()
   };
 
   beforeEach(() => {
@@ -170,15 +169,6 @@ describe('RubiksCube Component', () => {
     expect(cubeGroup).toBeInTheDocument();
   });
 
-  it('should handle highlightedPieces prop', () => {
-    const highlightedPieces = [
-      { pieceId: 0, blackVisibleFaces: ['front'] },
-      { pieceId: 1, blackVisibleFaces: ['back'] }
-    ];
-    const props = { ...defaultProps, highlightedPieces };
-    
-    expect(() => render(<RubiksCube {...props} />)).not.toThrow();
-  });
 
   it('should call onCubeStateChange when state changes', () => {
     render(<RubiksCube {...defaultProps} />);
@@ -206,8 +196,7 @@ describe('RubiksCube Component', () => {
   it('should handle missing callback props gracefully', () => {
     const propsWithoutCallbacks = {
       isRotating: false,
-      autoRotate: false,
-      highlightedPieces: []
+      autoRotate: false
     };
     
     expect(() => render(<RubiksCube {...propsWithoutCallbacks} />)).not.toThrow();
@@ -239,40 +228,6 @@ describe('RubiksCube Component', () => {
     expect(() => render(<RubiksCube {...propsWithUndefinedCallbacks} />)).not.toThrow();
   });
 
-  it('should handle complex highlightedPieces', () => {
-    const complexHighlightedPieces = [
-      {
-        pieceId: 0,
-        blackVisibleFaces: ['front', 'right', 'top']
-      },
-      {
-        pieceId: 5,
-        blackVisibleFaces: ['back', 'left', 'bottom']
-      },
-      {
-        pieceId: 10,
-        blackVisibleFaces: []
-      }
-    ];
-    
-    const props = { ...defaultProps, highlightedPieces: complexHighlightedPieces };
-    expect(() => render(<RubiksCube {...props} />)).not.toThrow();
-  });
-
-  it('should handle empty highlightedPieces array', () => {
-    const props = { ...defaultProps, highlightedPieces: [] };
-    expect(() => render(<RubiksCube {...props} />)).not.toThrow();
-  });
-
-  it('should handle null highlightedPieces', () => {
-    const props = { ...defaultProps, highlightedPieces: null };
-    expect(() => render(<RubiksCube {...props} />)).not.toThrow();
-  });
-
-  it('should handle undefined highlightedPieces', () => {
-    const props = { ...defaultProps, highlightedPieces: undefined };
-    expect(() => render(<RubiksCube {...props} />)).not.toThrow();
-  });
 
   it('should handle all boolean combinations', () => {
     const booleanCombinations = [

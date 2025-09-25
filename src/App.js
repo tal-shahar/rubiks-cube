@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
-import IdentifyIncorrectShapes from './components/IdentifyIncorrectShapes';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -57,11 +56,12 @@ function App() {
   const [isScrambling, setIsScrambling] = useState(false);
   const [currentScramble, setCurrentScramble] = useState('');
   const [cubeState, setCubeState] = useState(null);
-  const [highlightedPieces, setHighlightedPieces] = useState([]);
   const scrambleRef = useRef();
   const resetRef = useRef();
   const solveRef = useRef();
   const rotateFaceRef = useRef();
+  const cameraResetRef = useRef();
+  const groupRef = useRef();
 
   const handleScramble = () => {
     if (scrambleRef.current) {
@@ -80,9 +80,30 @@ function App() {
   };
 
   const handleReset = () => {
+    console.log('handleReset called');
+    console.log('resetRef.current:', !!resetRef.current);
+    console.log('cameraResetRef.current:', !!cameraResetRef.current);
+    console.log('groupRef.current:', !!groupRef.current);
+    
     if (resetRef.current) {
       setCurrentScramble('');
       resetRef.current();
+      // Also reset camera position
+      if (cameraResetRef.current) {
+        console.log('Calling camera reset function');
+        cameraResetRef.current();
+      } else {
+        console.log('Camera reset function not available');
+      }
+      // Also reset cube rotation/orientation with a small delay
+      setTimeout(() => {
+        if (groupRef.current && groupRef.current.rotation) {
+          groupRef.current.rotation.set(0, 0, 0);
+          console.log('Cube rotation reset to initial orientation');
+        } else {
+          console.log('Group ref not available for rotation reset');
+        }
+      }, 150); // Slightly longer delay to ensure camera reset completes first
     }
   };
 
@@ -171,121 +192,6 @@ function App() {
   }, []);
 
 
-  const handleIdentification = (identificationResult) => {
-    // Clear previous highlights
-    setHighlightedPieces([]);
-    
-    // Log identification results to main development terminal
-    // console.log('\n' + '🔍'.repeat(50));
-    // console.log(`🎯 IDENTIFICATION RESULT IN MAIN TERMINAL!`);
-    // console.log(`📊 Type: ${identificationResult.type}`);
-    
-    if (identificationResult.type === 'piece') {
-      // console.log(`🆔 Piece ID: ${identificationResult.pieceId}`);
-      // console.log(`🎨 Shape: ${identificationResult.shapeColor} ${identificationResult.shapeType}`);
-      // console.log(`📍 Current Position: [${identificationResult.currentPosition.join(', ')}]`);
-      // console.log(`🎯 Expected Position: [${identificationResult.expectedPosition.join(', ')}]`);
-      // console.log(`✅ Is Correct: ${identificationResult.isInCorrectPosition}`);
-      // console.log(`🎭 Expected Border Colors:`, identificationResult.expectedBorderColors);
-      // console.log(`📊 Move History: ${identificationResult.rotationHistory.length} moves`);
-    } else if (identificationResult.type === 'combination') {
-      // console.log(`🎯 Combination: ${identificationResult.combination.shapeColor} ${identificationResult.combination.shapeType} with ${identificationResult.combination.borderColor} border`);
-      // console.log(`🔢 Count: ${identificationResult.count} incorrect pieces found`);
-      // console.log(`📋 Incorrect Pieces:`, identificationResult.incorrectPieces);
-    } else if (identificationResult.type === 'blackFaces') {
-      console.log(`⚫ BLACK FACES IDENTIFIED: ${identificationResult.count} pieces with visible black faces found`);
-      console.log(`🔢 TOTAL BLACK FACES: ${identificationResult.totalBlackFaces} individual faces painted pink`);
-      console.log(`📋 Pieces with Black Visible Faces (highlighted in pink):`, identificationResult.incorrectPieces.map(p => ({
-        pieceId: p.pieceId,
-        shape: `${p.shapeColor} ${p.shapeType}`,
-        position: `[${p.currentPosition.join(', ')}]`,
-        blackVisibleFaces: p.blackVisibleFaces,
-        blackFaceCount: p.blackVisibleFaces.length,
-        visibleFaces: p.visibleFaces,
-        allColors: p.colors
-      })));
-      
-      // Set highlighted pieces for visual feedback
-      setHighlightedPieces(identificationResult.incorrectPieces);
-    } else {
-      console.log(`🔢 Count: ${identificationResult.count} incorrect pieces found`);
-      
-      if (identificationResult.type === 'shape') {
-        console.log(`🔷 Shape Type: ${identificationResult.shapeType}`);
-      } else if (identificationResult.type === 'color') {
-        console.log(`🎨 Shape Color: ${identificationResult.shapeColor}`);
-      } else if (identificationResult.type === 'border') {
-        console.log(`🎭 Border Color: ${identificationResult.borderColorName} (${identificationResult.borderColorHex})`);
-        console.log(`🎯 Face Index: ${identificationResult.faceIndex}`);
-      }
-      
-      console.log(`📋 Incorrect Pieces:`, identificationResult.incorrectPieces);
-    }
-    
-    console.log('🔍'.repeat(50) + '\n');
-    
-    // Force output to the React development server terminal
-    if (identificationResult.type === 'piece') {
-      console.error(`\n🔍 PIECE IDENTIFICATION: ${identificationResult.shapeColor} ${identificationResult.shapeType} (Piece ${identificationResult.pieceId})`);
-      console.error(`📍 Position: [${identificationResult.currentPosition.join(', ')}] -> [${identificationResult.expectedPosition.join(', ')}]`);
-      console.error(`✅ Correct: ${identificationResult.isInCorrectPosition}`);
-    } else if (identificationResult.type === 'combination') {
-      console.error(`\n🔍 COMBINATION IDENTIFICATION: ${identificationResult.combination.shapeColor} ${identificationResult.combination.shapeType} with ${identificationResult.combination.borderColor} border - ${identificationResult.count} incorrect pieces`);
-      const details = identificationResult.incorrectPieces.map(p => 
-        `${p.shapeColor} ${p.shapeType} (Piece ${p.pieceId}) at [${p.currentPosition.join(', ')}]`
-      ).join(', ');
-      console.error(`📋 Details:`, details);
-    } else if (identificationResult.type === 'blackFaces') {
-      console.error(`\n⚫ BLACK FACES IDENTIFICATION: ${identificationResult.count} pieces with visible black faces found`);
-      console.error(`🔢 TOTAL BLACK FACES: ${identificationResult.totalBlackFaces} individual faces painted pink`);
-      const details = identificationResult.incorrectPieces.map(p => 
-        `${p.shapeColor} ${p.shapeType} (Piece ${p.pieceId}) at [${p.currentPosition.join(', ')}] - Black visible faces: [${p.blackVisibleFaces.join(', ')}] (${p.blackVisibleFaces.length} faces) (highlighted in pink)`
-      ).join(', ');
-      console.error(`📋 Details:`, details);
-    } else {
-      if (identificationResult.type === 'border') {
-        console.error(`\n🔍 BORDER IDENTIFICATION: ${identificationResult.borderColorName.toUpperCase()} - ${identificationResult.count} incorrect pieces`);
-        console.error(`🎭 Border Color: ${identificationResult.borderColorName} (${identificationResult.borderColorHex})`);
-        const details = identificationResult.incorrectPieces.map(p => 
-          `${p.shapeColor} ${p.shapeType} (Piece ${p.pieceId}) at [${p.currentPosition.join(', ')}]`
-        ).join(', ');
-        console.error(`📋 Details:`, details);
-      } else {
-        console.error(`\n🔍 IDENTIFICATION: ${identificationResult.type.toUpperCase()} - ${identificationResult.count} incorrect pieces`);
-        const details = identificationResult.incorrectPieces.map(p => 
-          `${p.shapeColor} ${p.shapeType} (Piece ${p.pieceId}) at [${p.currentPosition.join(', ')}]`
-        ).join(', ');
-        console.error(`📋 Details:`, details);
-      }
-    }
-    
-    // Try to write directly to stdout
-    if (typeof process !== 'undefined' && process.stdout) {
-      if (identificationResult.type === 'piece') {
-        process.stdout.write(`\n🔍 PIECE IDENTIFICATION: ${identificationResult.shapeColor} ${identificationResult.shapeType} (Piece ${identificationResult.pieceId})\n`);
-        process.stdout.write(`Position: [${identificationResult.currentPosition.join(', ')}] -> [${identificationResult.expectedPosition.join(', ')}]\n`);
-        process.stdout.write(`Correct: ${identificationResult.isInCorrectPosition}\n\n`);
-      } else if (identificationResult.type === 'combination') {
-        process.stdout.write(`\n🔍 COMBINATION IDENTIFICATION: ${identificationResult.combination.shapeColor} ${identificationResult.combination.shapeType} with ${identificationResult.combination.borderColor} border\n`);
-        process.stdout.write(`Count: ${identificationResult.count} incorrect pieces\n`);
-        process.stdout.write(`Details: ${identificationResult.incorrectPieces.length} pieces identified\n\n`);
-      } else if (identificationResult.type === 'blackFaces') {
-        process.stdout.write(`\n⚫ BLACK FACES IDENTIFICATION: ${identificationResult.count} pieces with visible black faces found\n`);
-        process.stdout.write(`🔢 TOTAL BLACK FACES: ${identificationResult.totalBlackFaces} individual faces painted pink\n`);
-        process.stdout.write(`Details: ${identificationResult.incorrectPieces.length} pieces identified (highlighted in pink)\n\n`);
-      } else {
-        if (identificationResult.type === 'border') {
-          process.stdout.write(`\n🔍 BORDER IDENTIFICATION: ${identificationResult.borderColorName.toUpperCase()}\n`);
-          process.stdout.write(`Count: ${identificationResult.count} incorrect pieces\n`);
-          process.stdout.write(`Border Color: ${identificationResult.borderColorName} (${identificationResult.borderColorHex})\n\n`);
-        } else {
-          process.stdout.write(`\n🔍 IDENTIFICATION RESULT: ${identificationResult.type.toUpperCase()}\n`);
-          process.stdout.write(`Count: ${identificationResult.count} incorrect pieces\n`);
-          process.stdout.write(`Details: ${identificationResult.incorrectPieces.length} pieces identified\n\n`);
-        }
-      }
-    }
-  };
 
   return (
     <AppContainer>
@@ -303,8 +209,9 @@ function App() {
             onReset={(resetFn) => { resetRef.current = resetFn; }}
             onSolve={(solveFn) => { solveRef.current = solveFn; }}
             onRotateFace={(rotateFaceFn) => { rotateFaceRef.current = rotateFaceFn; }}
+            onCameraReset={(cameraResetFn) => { cameraResetRef.current = cameraResetFn; }}
+            onGroupRef={(groupRefFn) => { groupRef.current = groupRefFn; }}
             onCubeStateChange={setCubeState}
-            highlightedPieces={highlightedPieces}
           />
         </CubeContainer>
         
@@ -323,13 +230,6 @@ function App() {
         <InfoPanel 
           currentScramble={currentScramble}
           isScrambling={isScrambling}
-        />
-        
-        <IdentifyIncorrectShapes
-          isScrambling={isScrambling}
-          cubeState={cubeState}
-          onIdentification={handleIdentification}
-          setCubeState={setCubeState}
         />
       </MainContent>
     </AppContainer>

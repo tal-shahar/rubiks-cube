@@ -37,8 +37,6 @@ describe('CubePiece Component', () => {
     },
     size: 0.95,
     pieceId: 0,
-    isHighlighted: false,
-    highlightInfo: null,
     rotatingFace: null,
     rotationProgress: 0
   };
@@ -66,20 +64,6 @@ describe('CubePiece Component', () => {
     expect(() => render(<CubePiece {...props} />)).not.toThrow();
   });
 
-  it('should render highlighted piece', () => {
-    const highlightInfo = {
-      shapeType: 'Square',
-      shapeColor: 'Red',
-      pieceId: 0,
-      blackVisibleFaces: ['front']
-    };
-    const props = { 
-      ...defaultProps, 
-      isHighlighted: true, 
-      highlightInfo 
-    };
-    expect(() => render(<CubePiece {...props} />)).not.toThrow();
-  });
 
   it('should render with rotating face', () => {
     const rotatingFace = { face: 'F', direction: 'clockwise' };
@@ -163,37 +147,6 @@ describe('CubePiece Component', () => {
     });
   });
 
-  it('should handle highlight info variations', () => {
-    const highlightVariations = [
-      {
-        shapeType: 'Circle',
-        shapeColor: 'Blue',
-        pieceId: 1,
-        blackVisibleFaces: ['back', 'right']
-      },
-      {
-        shapeType: 'Triangle',
-        shapeColor: 'Green',
-        pieceId: 2,
-        blackVisibleFaces: []
-      },
-      {
-        shapeType: 'Diamond',
-        shapeColor: 'Yellow',
-        pieceId: 3,
-        blackVisibleFaces: ['top', 'bottom', 'left']
-      }
-    ];
-
-    highlightVariations.forEach(highlightInfo => {
-      const props = { 
-        ...defaultProps, 
-        isHighlighted: true, 
-        highlightInfo 
-      };
-      expect(() => render(<CubePiece {...props} />)).not.toThrow();
-    });
-  });
 
   it('should handle pieceId edge cases', () => {
     const pieceIds = [0, 25, 26, -1, 100];
@@ -242,13 +195,6 @@ describe('CubePiece Component', () => {
       },
       size: 1.2,
       pieceId: 15,
-      isHighlighted: true,
-      highlightInfo: {
-        shapeType: 'Triangle',
-        shapeColor: 'Purple',
-        pieceId: 15,
-        blackVisibleFaces: ['front', 'back']
-      },
       rotatingFace: { face: 'R', direction: 'counterclockwise' },
       rotationProgress: 0.8
     };

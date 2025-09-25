@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { createShapeWithFaceBorder } from '../utils/shapes';
 
 // Individual cube piece component with smooth rotation
-export function CubePiece({ position, colors, size = 0.95, pieceId = 0, isHighlighted = false, highlightInfo = null, rotatingFace = null, rotationProgress = 0 }) {
+export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotatingFace = null, rotationProgress = 0 }) {
   const meshRef = useRef();
   const groupRef = useRef();
   
@@ -273,15 +273,8 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, isHighli
             faceRotation = [0, 0, 0];
         }
         
-        // Check if this face should be highlighted (painted pink)
-        const faceNames = ['front', 'back', 'right', 'left', 'top', 'bottom'];
-        const currentFaceName = faceNames[faceIndex];
-        const shouldHighlight = isHighlighted && highlightInfo && 
-          highlightInfo.blackVisibleFaces && 
-          highlightInfo.blackVisibleFaces.includes(currentFaceName);
-        
-        // If this face should be highlighted, paint it bright pink
-        const displayColor = shouldHighlight ? '#FF1493' : (colorMap[faceColor] || faceColor || '#444444');
+        // Use the face color directly
+        const displayColor = colorMap[faceColor] || faceColor || '#444444';
         
         return (
           <mesh

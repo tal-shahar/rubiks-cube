@@ -1,11 +1,58 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { CubeStateProvider } from './cube/state/CubeStateProvider';
 import { RubiksCube as ModularRubiksCube } from './cube/RubiksCube';
 
+// Camera reset component
+const CameraReset = ({ onCameraReset }) => {
+  console.log('CameraReset component rendering, onCameraReset:', !!onCameraReset);
+  const { camera, gl } = useThree();
+  
+  // Store initial camera position
+  const initialCameraPosition = [5, 5, 5];
+  const initialTarget = [0, 0, 0];
+  
+  // Expose camera reset function to parent
+  useEffect(() => {
+    console.log('CameraReset useEffect running, onCameraReset:', !!onCameraReset);
+    if (onCameraReset) {
+      console.log('Setting up camera reset function');
+      onCameraReset(() => {
+        console.log('Camera reset function called');
+        console.log('OrbitControls ref available:', !!window.orbitControlsRef);
+        console.log('Camera object:', camera);
+        
+        // Use a timeout to ensure the reset happens after the cube state reset
+        setTimeout(() => {
+          if (window.orbitControlsRef) {
+            console.log('Resetting camera position to:', initialCameraPosition);
+            console.log('Resetting camera target to:', initialTarget);
+            
+            // Reset camera position
+            camera.position.set(...initialCameraPosition);
+            // Reset controls target
+            window.orbitControlsRef.target.set(...initialTarget);
+            // Update controls
+            window.orbitControlsRef.update();
+            // Force render
+            gl.render();
+            
+            console.log('Camera reset to initial position - COMPLETED');
+          } else {
+            console.log('OrbitControls ref not available for camera reset');
+          }
+        }, 100); // Small delay to ensure cube state reset completes first
+      });
+    }
+  }, [onCameraReset, camera, gl]);
+  
+  return null; // This component doesn't render anything
+};
+
 // Main Rubik's Cube component that uses the modular implementation
-export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, highlightedPieces = [] }) {
+export function RubiksCubeWrapper({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, onCameraReset, onGroupRef }) {
+  console.log('RubiksCube component rendering, onCameraReset:', !!onCameraReset);
   
   return (
     <CubeStateProvider onCubeStateChange={onCubeStateChange}>
@@ -21,11 +68,16 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
           }
         }, [onScramble]);
 
+        // Store reference to reset function from modular component
+        const resetRef = useRef();
+        
         useEffect(() => {
           if (onReset) {
             onReset(() => {
-              // Reset function will be implemented in the modular component
-              console.log('Reset function called');
+              // Call the actual reset function from the modular component
+              if (resetRef.current) {
+                resetRef.current();
+              }
             });
           }
         }, [onReset]);
@@ -48,12 +100,25 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
           }
         }, [onRotateFace]);
 
+
         return (
           <Canvas
             camera={{ position: [5, 5, 5], fov: 50 }}
             style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
           >
-            <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+            <CameraReset onCameraReset={onCameraReset} />
+            <OrbitControls 
+              ref={ref => {
+                // Store controls reference for camera reset
+                if (ref) {
+                  window.orbitControlsRef = ref;
+                  console.log('OrbitControls ref set:', ref);
+                }
+              }}
+              enablePan={true} 
+              enableZoom={true} 
+              enableRotate={true} 
+            />
             <Environment preset="sunset" />
             <ambientLight intensity={0.4} />
             <directionalLight position={[10, 10, 5]} intensity={1} />
@@ -74,8 +139,11 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               setHasRotated={setHasRotated}
               isRotating={isRotating}
               autoRotate={autoRotate}
-              highlightedPieces={highlightedPieces}
+              onResetRef={resetRef}
+              onGroupRef={onGroupRef}
             />
+            
+            <CameraReset />
           </Canvas>
         );
       }}
@@ -83,4 +151,4 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
   );
 }
 
-export default RubiksCube;
+export default RubiksCubeWrapper;

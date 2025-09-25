@@ -209,129 +209,11 @@ function Controls({
     onRotateFace(face, direction);
   };
 
-  const handlePrintPosition = () => {
-    if (!cubeState) return;
-    
-    // Handle both old format (array) and new format (enhanced object)
-    let pieces;
-    if (Array.isArray(cubeState)) {
-      // Old format - cubeState is an array
-      pieces = cubeState.map((piece, index) => ({
-        pieceId: index,
-        position: piece.position,
-        colors: piece.colors,
-        rotationHistory: piece.rotationHistory || [],
-        shapeType: getShapeType(index),
-        shapeColor: getShapeColor(index)
-      }));
-    } else {
-      // New format - cubeState is an enhanced object
-      pieces = cubeState.pieces || [];
-    }
-    
-    // Create a clean JSON structure with piece information
-    const cubeData = {
-      timestamp: new Date().toISOString(),
-      totalPieces: pieces.length,
-      pieces: pieces
-    };
-    
-    // Log to browser console
-    console.log('🎯 CURRENT CUBE POSITION (Manual Print):');
-    console.log(JSON.stringify(cubeData, null, 2));
-    console.log('='.repeat(80));
-    
-    // Send to log server to print in terminal
-    fetch('http://localhost:3001/log', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: 'CURRENT CUBE POSITION (Manual Print)',
-        data: cubeData
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      console.log('✅ Log sent to terminal successfully');
-      // Also try to trigger a visual indicator
-      alert('✅ Cube position printed to terminal! Check the terminal where npm run dev is running.');
-    })
-    .catch(error => {
-      console.error('❌ Could not send log to terminal server:', error);
-      console.log('💡 Make sure the log server is running with: npm run log-server');
-      alert('❌ Could not send log to terminal. Check browser console for details.');
-    });
-    
-    console.log('Cube position printed to terminal');
-  };
 
-  const handleDownload = () => {
-    if (!cubeState) return;
-    
-    // Handle both old format (array) and new format (enhanced object)
-    let pieces;
-    if (Array.isArray(cubeState)) {
-      // Old format - cubeState is an array
-      pieces = cubeState.map((piece, index) => ({
-        pieceId: index,
-        position: piece.position,
-        colors: piece.colors,
-        rotationHistory: piece.rotationHistory || [],
-        shapeType: getShapeType(index),
-        shapeColor: getShapeColor(index)
-      }));
-    } else {
-      // New format - cubeState is an enhanced object
-      pieces = cubeState.pieces || [];
-    }
-    
-    // Create a clean JSON structure with piece information
-    const cubeData = {
-      timestamp: new Date().toISOString(),
-      totalPieces: pieces.length,
-      pieces: pieces
-    };
-    
-    // Create and download the JSON file
-    const dataStr = JSON.stringify(cubeData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `rubiks-cube-state-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    console.log('Cube state downloaded:', cubeData);
-  };
 
-  // Helper functions for shape information
-  const getShapeType = (pieceId) => {
-    const shapeTypes = ['Square', 'Square', 'Square', 'Square', 'Square', 'Circle', 'Circle', 'Circle', 'Circle', 'Circle', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Triangle'];
-    return shapeTypes[pieceId] || 'Unknown';
-  };
-
-  const getShapeColor = (pieceId) => {
-    const shapeColors = ['Red', 'Blue', 'Green', 'Orange', 'Purple', 'Red', 'Blue', 'Green', 'Orange', 'Yellow', 'Cyan', 'Magenta', 'Lime', 'Pink', 'Purple', 'Red', 'Blue', 'Green', 'Orange', 'Purple', 'Cyan', 'Magenta', 'Lime', 'Pink', 'Purple', 'Yellow'];
-    return shapeColors[pieceId] || 'Unknown';
-  };
 
   return (
     <ControlsContainer>
-      <ButtonGroup>
-        <Label>Quick Test:</Label>
-        <FaceButtonGroup>
-          <RButton onClick={() => handleFaceRotation('R', 'clockwise')} style={{ fontSize: '16px', padding: '12px 16px', margin: '5px' }}>
-            R
-          </RButton>
-        </FaceButtonGroup>
-      </ButtonGroup>
 
       <ButtonGroup>
         <Label>Auto Rotate:</Label>
@@ -395,20 +277,6 @@ function Controls({
           disabled={isAnimating}
         >
           {isAnimating ? 'Solving...' : 'Solve'}
-        </ActionButton>
-        <ActionButton 
-          onClick={handlePrintPosition}
-          disabled={!cubeState}
-          style={{ background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' }}
-        >
-          Print Position
-        </ActionButton>
-        <ActionButton 
-          onClick={handleDownload}
-          disabled={!cubeState}
-          style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' }}
-        >
-          Download JSON
         </ActionButton>
       </ButtonGroup>
     </ControlsContainer>
