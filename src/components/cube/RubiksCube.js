@@ -128,22 +128,21 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
           };
 
           // Generate optimal solve sequence using beginner's method
-          const generateOptimalSolve = (currentState) => {
+          const generateOptimalSolve = (moveHistory) => {
             // This is a simplified version - in reality, you'd use proper algorithms like CFOP
             // For now, we'll use the reverse of all moves, but optimize the sequence
             
-            const allMoves = [];
-            currentState.forEach(piece => {
-              if (piece.rotationHistory) {
-                allMoves.push(...piece.rotationHistory);
-              }
-            });
+            if (moveHistory.length === 0) {
+              console.log('⚠️ No moves to reverse - cube might already be solved or no moves were recorded');
+              return [];
+            }
             
             // Reverse the moves and create solve sequence
-            const solveSequence = allMoves
+            const solveSequence = moveHistory
+              .slice()
               .reverse()
               .map(move => ({
-                face: move.move,
+                face: move.face,
                 direction: move.direction === 'clockwise' ? 'counterclockwise' : 'clockwise'
               }));
             
@@ -155,9 +154,16 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
             if (isAnimating) return;
             
             console.log('🧩 SOLVING CUBE...');
+            console.log(`🎯 SOLVING CUBE: Reversing ${moveHistory.length} moves`);
+            console.log('📋 Move history:', moveHistory.map(m => `${m.face} ${m.direction}`));
             
-            // Generate solve sequence from current state
-            const solveSequence = generateOptimalSolve(cubeState);
+            // Generate solve sequence from move history
+            const solveSequence = generateOptimalSolve(moveHistory);
+            
+            if (solveSequence.length === 0) {
+              console.log('⚠️ No moves to reverse - cube might already be solved or no moves were recorded');
+              return;
+            }
             
             console.log('🔄 Reversed sequence:', solveSequence.map(m => `${m.face} ${m.direction}`));
             console.log(`🚀 Starting solve with ${solveSequence.length} moves...`);
