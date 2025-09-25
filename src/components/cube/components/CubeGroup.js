@@ -124,13 +124,7 @@ export function CubeGroup({
     };
   }, [autoRotate, rotationSpeed]);
 
-  // Manual rotation effect
-  useEffect(() => {
-    if (isRotating && groupRef.current && groupRef.current.rotation) {
-      groupRef.current.rotation.x += 0.01;
-      groupRef.current.rotation.y += 0.01;
-    }
-  }, [isRotating]);
+  // Manual rotation is now handled by OrbitControls in the main component
 
   // Helper function to determine if a piece is part of the rotating face
   const isPartOfRotatingFace = useCallback((piece, rotatingFace) => {

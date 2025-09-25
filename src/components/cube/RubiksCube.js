@@ -259,7 +259,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
         }}
         enablePan={true} 
         enableZoom={true} 
-        enableRotate={true} 
+        enableRotate={isRotating} 
       />
       <Environment preset="sunset" />
     </Canvas>
