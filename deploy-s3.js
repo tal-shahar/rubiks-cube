@@ -34,10 +34,8 @@ async function uploadFile(filePath, key) {
     CacheControl: getCacheControl(filePath),
   };
 
-  // Add gzip encoding for text files
-  if (contentType.includes('text/') || contentType.includes('application/javascript') || contentType.includes('application/json')) {
-    uploadParams.ContentEncoding = 'gzip';
-  }
+  // Note: Removed gzip encoding to fix ERR_CONTENT_DECODING_FAILED
+  // CloudFront will handle compression automatically
 
   try {
     const command = new PutObjectCommand(uploadParams);
