@@ -1,6 +1,5 @@
 import React, { useRef, useMemo, useCallback } from 'react';
 import * as THREE from 'three';
-import { createShapeWithFaceBorder } from '../utils/shapes';
 
 // Individual cube piece component with smooth rotation
 export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotatingFace = null, rotationProgress = 0 }) {
@@ -24,62 +23,6 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
   //   }
   // }
   
-  // Log piece information for debugging
-  React.useEffect(() => {
-    const shapeTypes = ['Square', 'Square', 'Square', 'Square', 'Square', 'Circle', 'Circle', 'Circle', 'Circle', 'Circle', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Diamond', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Triangle', 'Triangle'];
-    const shapeColors = ['Red', 'Blue', 'Green', 'Orange', 'Purple', 'Red', 'Blue', 'Green', 'Orange', 'Yellow', 'Cyan', 'Magenta', 'Lime', 'Pink', 'Purple', 'Red', 'Blue', 'Green', 'Orange', 'Purple', 'Cyan', 'Magenta', 'Lime', 'Pink', 'Purple', 'Yellow'];
-    
-    const shapeType = shapeTypes[pieceId] || 'Unknown'; // Changed from pieceId % shapeTypes.length
-    const shapeColor = shapeColors[pieceId] || 'Unknown'; // Changed from pieceId % shapeColors.length
-    
-    // Debug specific pieces only - DISABLED
-    // if (pieceId === 0 || pieceId === 17 || pieceId === 25 || pieceId === 1 || pieceId === 11) {
-    //   console.log(`🔍 ${shapeColor} ${shapeType} Piece ${pieceId} at position [${position.join(', ')}]`);
-    //   console.log(`  Stored Colors:`, colors);
-    //   
-    //   // Check if this piece is in its original solved position
-    //   const originalPosition = [-1, -1, -1]; // Default for piece 0
-    //   const isInOriginalPosition = position[0] === originalPosition[0] && 
-    //                                position[1] === originalPosition[1] && 
-    //                                position[2] === originalPosition[2];
-    //   
-    //   if (isInOriginalPosition) {
-    //     console.log(`🔍 Piece ${pieceId} is in ORIGINAL SOLVED position`);
-    //   } else {
-    //     console.log(`🔍 Piece ${pieceId} is in SCRAMBLED position`);
-    //   }
-    //   
-    //   // Check if the Three.js mesh position matches the data position
-    //   if (meshRef.current) {
-    //     const meshPosition = meshRef.current.position;
-    //     console.log(`🔍 Piece ${pieceId} Three.js mesh position: [${meshPosition.x}, ${meshPosition.y}, ${meshPosition.z}]`);
-    //     console.log(`🔍 Piece ${pieceId} Data position: [${position.join(', ')}]`);
-    //     
-    //     const positionsMatch = Math.abs(meshPosition.x - position[0]) < 0.1 && 
-    //                           Math.abs(meshPosition.y - position[1]) < 0.1 && 
-    //                           Math.abs(meshPosition.z - position[2]) < 0.1;
-    //     
-    //     if (positionsMatch) {
-    //       console.log(`✅ Piece ${pieceId} Three.js position matches data position`);
-    //     } else {
-    //       console.log(`🚨 Piece ${pieceId} Three.js position does NOT match data position!`);
-    //     }
-    //   }
-    //   
-    //   // Show what colors should be visible based on position
-    //   const [x, y, z] = position;
-    //   const visibleFaces = [];
-    //   if (x === 1) visibleFaces.push('right');
-    //   if (x === -1) visibleFaces.push('left');
-    //   if (y === 1) visibleFaces.push('top');
-    //   if (y === -1) visibleFaces.push('bottom');
-    //   if (z === 1) visibleFaces.push('front');
-    //   if (z === -1) visibleFaces.push('back');
-    //   
-    //   console.log(`  Visible faces:`, visibleFaces);
-    //   console.log(`  Colors on visible faces:`, visibleFaces.map(face => `${face}: ${colors[face]}`));
-    // }
-  }, [pieceId, position, colors]);
 
   // Color mapping
   const colorMap = {
@@ -290,56 +233,6 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
               emissiveIntensity={isPartOfRotatingFace() ? 0.5 : 0.1}
             />
           </mesh>
-        );
-      })}
-      
-      {/* Debug shape on visible faces only */}
-      {[0, 1, 2, 3, 4, 5].map((faceIndex) => {
-        // Only render shapes on faces that should be visible based on original position
-        if (!isFaceVisible(faceIndex)) {
-          return null;
-        }
-
-        // Define face positions and rotations correctly (same as colored faces)
-        let facePosition, faceRotation;
-        
-        switch (faceIndex) {
-          case 0: // Front face (Z+)
-            facePosition = [0, 0, size/2 + 0.002];
-            faceRotation = [0, 0, 0];
-            break;
-          case 1: // Back face (Z-)
-            facePosition = [0, 0, -size/2 - 0.002];
-            faceRotation = [0, Math.PI, 0];
-            break;
-          case 2: // Right face (X+)
-            facePosition = [size/2 + 0.002, 0, 0];
-            faceRotation = [0, Math.PI/2, 0];
-            break;
-          case 3: // Left face (X-)
-            facePosition = [-size/2 - 0.002, 0, 0];
-            faceRotation = [0, -Math.PI/2, 0];
-            break;
-          case 4: // Top face (Y+)
-            facePosition = [0, size/2 + 0.002, 0];
-            faceRotation = [-Math.PI/2, 0, 0];
-            break;
-          case 5: // Bottom face (Y-)
-            facePosition = [0, -size/2 - 0.002, 0];
-            faceRotation = [Math.PI/2, 0, 0];
-            break;
-          default:
-            facePosition = [0, 0, 0];
-            faceRotation = [0, 0, 0];
-        }
-        
-        // Get the face color for this specific face
-        const faceColor = getFaceColor(faceIndex);
-        
-        return (
-          <group key={`shape-${faceIndex}`} position={facePosition} rotation={faceRotation}>
-            {createShapeWithFaceBorder(pieceId, size * 0.3, faceIndex, colors)}
-          </group>
         );
       })}
     </group>

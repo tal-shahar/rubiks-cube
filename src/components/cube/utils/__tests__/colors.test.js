@@ -12,11 +12,11 @@ describe('Color Utilities', () => {
       const colors = getOriginalColors(0);
       
       expect(colors).toEqual({
-        front: '#444444',    // Not visible (z = -1)
+        front: 'white',      // All faces get colors
         back: 'yellow',      // Visible (z = -1)
-        right: '#444444',    // Not visible (x = -1)
+        right: 'red',        // All faces get colors
         left: 'orange',      // Visible (x = -1)
-        top: '#444444',      // Not visible (y = -1)
+        top: 'blue',         // All faces get colors
         bottom: 'green'      // Visible (y = -1)
       });
     });
@@ -26,11 +26,11 @@ describe('Color Utilities', () => {
       const colors = getOriginalColors(1);
       
       expect(colors).toEqual({
-        front: '#444444',
-        back: '#444444',
-        right: '#444444',
+        front: 'white',
+        back: 'yellow',
+        right: 'red',
         left: 'orange',     // x = -1
-        top: '#444444',
+        top: 'blue',
         bottom: 'green'     // y = -1
       });
     });
@@ -41,11 +41,11 @@ describe('Color Utilities', () => {
       
       expect(colors).toEqual({
         front: 'white',      // Visible (z = 1)
-        back: '#444444',    // Not visible (z = 1)
-        right: '#444444',   // Not visible (x = 0)
-        left: '#444444',    // Not visible (x = 0)
-        top: '#444444',     // Not visible (y = 0)
-        bottom: '#444444'   // Not visible (y = 0)
+        back: 'yellow',      // All faces get colors
+        right: 'red',        // All faces get colors
+        left: 'orange',      // All faces get colors
+        top: 'blue',         // All faces get colors
+        bottom: 'green'      // All faces get colors
       });
     });
 
@@ -55,11 +55,11 @@ describe('Color Utilities', () => {
       
       expect(colors).toEqual({
         front: 'white',      // Visible (z = 1)
-        back: '#444444',    // Not visible (z = 1)
-        right: 'red',       // Visible (x = 1)
-        left: '#444444',    // Not visible (x = 1)
-        top: 'blue',        // Visible (y = 1)
-        bottom: '#444444'   // Not visible (y = 1)
+        back: 'yellow',      // All faces get colors
+        right: 'red',        // Visible (x = 1)
+        left: 'orange',      // All faces get colors
+        top: 'blue',         // Visible (y = 1)
+        bottom: 'green'      // All faces get colors
       });
     });
 
@@ -153,11 +153,11 @@ describe('Color Utilities', () => {
       const result = ensureStartingColorsOutwardFacing(piece, currentPosition);
       
       expect(result.front).toBe('white');
-      expect(result.back).toBe('#444444');
-      expect(result.right).toBe('#444444');
-      expect(result.left).toBe('#444444');
-      expect(result.top).toBe('#444444');
-      expect(result.bottom).toBe('#444444');
+      expect(result.back).toBe('yellow');
+      expect(result.right).toBe('red');
+      expect(result.left).toBe('orange');
+      expect(result.top).toBe('blue');
+      expect(result.bottom).toBe('green');
     });
 
     it('should position colors correctly for back face piece', () => {
@@ -178,12 +178,12 @@ describe('Color Utilities', () => {
       
       const result = ensureStartingColorsOutwardFacing(piece, currentPosition);
       
-      expect(result.front).toBe('#444444');
+      expect(result.front).toBe('white');
       expect(result.back).toBe('yellow');
-      expect(result.right).toBe('#444444');
-      expect(result.left).toBe('#444444');
-      expect(result.top).toBe('#444444');
-      expect(result.bottom).toBe('#444444');
+      expect(result.right).toBe('red');
+      expect(result.left).toBe('orange');
+      expect(result.top).toBe('blue');
+      expect(result.bottom).toBe('green');
     });
 
     it('should position colors correctly for right face piece', () => {
@@ -204,12 +204,12 @@ describe('Color Utilities', () => {
       
       const result = ensureStartingColorsOutwardFacing(piece, currentPosition);
       
-      expect(result.front).toBe('#444444');
-      expect(result.back).toBe('#444444');
+      expect(result.front).toBe('white');
+      expect(result.back).toBe('yellow');
       expect(result.right).toBe('red');
-      expect(result.left).toBe('#444444');
-      expect(result.top).toBe('#444444');
-      expect(result.bottom).toBe('#444444');
+      expect(result.left).toBe('orange');
+      expect(result.top).toBe('blue');
+      expect(result.bottom).toBe('green');
     });
 
     it('should handle piece without startingColors', () => {
@@ -267,10 +267,10 @@ describe('Color Utilities', () => {
     });
 
     it('should return default color for unknown face', () => {
-      expect(getExpectedColorForFace('unknown')).toBe('#444444');
-      expect(getExpectedColorForFace('')).toBe('#444444');
-      expect(getExpectedColorForFace(null)).toBe('#444444');
-      expect(getExpectedColorForFace(undefined)).toBe('#444444');
+      expect(getExpectedColorForFace('unknown')).toBe('red');
+      expect(getExpectedColorForFace('')).toBe('red');
+      expect(getExpectedColorForFace(null)).toBe('red');
+      expect(getExpectedColorForFace(undefined)).toBe('red');
     });
   });
 });

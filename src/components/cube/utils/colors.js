@@ -147,12 +147,12 @@ export function ensureStartingColorsOutwardFacing(piece, currentPosition) {
   
   // Create new color object with starting colors positioned outward
   const outwardColors = {
-    front: '#444444',    // Default to dark gray (hidden)
-    back: '#444444',     // Default to dark gray (hidden)
-    right: '#444444',    // Default to dark gray (hidden)
-    left: '#444444',     // Default to dark gray (hidden)
-    top: '#444444',      // Default to dark gray (hidden)
-    bottom: '#444444'    // Default to dark gray (hidden)
+    front: 'white',      // Default colors
+    back: 'yellow',      // Default colors
+    right: 'red',        // Default colors
+    left: 'orange',      // Default colors
+    top: 'blue',         // Default colors
+    bottom: 'green'      // Default colors
   };
   
   // Determine which faces should be visible based on current position
@@ -203,5 +203,5 @@ export function getExpectedColorForFace(face) {
     bottom: 'green'
   };
   
-  return colorMap[face] || '#444444';
+  return colorMap[face] || 'red';
 }

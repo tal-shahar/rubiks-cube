@@ -19,10 +19,6 @@ jest.mock('../CubePiece', () => ({
   }
 }));
 
-// Mock the shapes utility
-jest.mock('../../utils/shapes', () => ({
-  createShapeWithFaceBorder: jest.fn(() => <div data-testid="mocked-shape" />),
-}));
 
 describe('CubeGroup Component', () => {
   const mockCubeState = [

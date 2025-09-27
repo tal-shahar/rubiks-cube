@@ -30,13 +30,3 @@ jest.mock('three', () => ({
   Color: jest.fn(),
 }));
 
-// Mock React Three Fiber components
-jest.mock('@react-three/fiber', () => ({
-  useFrame: jest.fn(),
-  useThree: jest.fn(),
-}));
-
-// Mock the shapes utility
-jest.mock('./components/cube/utils/shapes', () => ({
-  createShapeWithFaceBorder: jest.fn(() => <div data-testid="mocked-shape" />),
-}));

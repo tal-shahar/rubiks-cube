@@ -15,14 +15,6 @@ jest.mock('three', () => ({
   FrontSide: 'FrontSide',
 }));
 
-// Mock the shape utilities
-jest.mock('../../utils/shapes', () => ({
-  createShapeWithFaceBorder: jest.fn(() => ({
-    type: 'group',
-    props: { position: [0, 0, 0.012] },
-    children: []
-  }))
-}));
 
 describe('CubePiece Component', () => {
   const defaultProps = {
