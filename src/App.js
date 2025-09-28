@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
+import { MiniCube } from './components/MiniCube';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -48,14 +49,17 @@ const CubeContainer = styled.div`
   border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
 `;
 
 function App() {
   const [isRotating, setIsRotating] = useState(false);
   const [autoRotate, setAutoRotate] = useState(false);
+  const [enableMouseRotation, setEnableMouseRotation] = useState(true);
   const [isScrambling, setIsScrambling] = useState(false);
   const [currentScramble, setCurrentScramble] = useState('');
   const [cubeState, setCubeState] = useState(null);
+  const [resetTrigger, setResetTrigger] = useState(0);
   const scrambleRef = useRef();
   const resetRef = useRef();
   const solveRef = useRef();
@@ -100,6 +104,8 @@ function App() {
         if (groupRef.current && groupRef.current.rotation) {
           groupRef.current.rotation.set(0, 0, 0);
           console.log('Cube rotation reset to initial orientation');
+          // Trigger mini cube reset
+          setResetTrigger(prev => prev + 1);
         } else {
           console.log('Group ref not available for rotation reset');
         }
@@ -127,6 +133,20 @@ function App() {
       }
     } else {
       // console.log('🎯 ERROR: rotateFaceRef.current is null!');
+    }
+  };
+
+  // Handle mini cube rotation for whole cube rotation
+  const handleMiniCubeRotation = (rotationData) => {
+    if (!groupRef.current || autoRotate) return;
+    
+    const { x, y, z } = rotationData;
+    
+    // Apply rotation directly to the main cube
+    if (groupRef.current.rotation) {
+      groupRef.current.rotation.x += x;
+      groupRef.current.rotation.y += y;
+      groupRef.current.rotation.z += z;
     }
   };
 
@@ -205,6 +225,7 @@ function App() {
           <RubiksCube 
             isRotating={isRotating}
             autoRotate={autoRotate}
+            enableMouseRotation={enableMouseRotation}
             onScramble={(scrambleFn) => { scrambleRef.current = scrambleFn; }}
             onReset={(resetFn) => { resetRef.current = resetFn; }}
             onSolve={(solveFn) => { solveRef.current = solveFn; }}
@@ -213,6 +234,29 @@ function App() {
             onGroupRef={(groupRefFn) => { groupRef.current = groupRefFn; }}
             onCubeStateChange={setCubeState}
           />
+          
+          {/* Mini Cube Overlay */}
+          <div style={{
+            position: 'absolute',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 10,
+            pointerEvents: 'auto',
+            background: 'rgba(0, 0, 0, 0.3)',
+            borderRadius: '10px',
+            padding: '10px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)'
+          }}>
+            <MiniCube 
+              onRotationChange={handleMiniCubeRotation}
+              disabled={autoRotate}
+              cubeState={cubeState}
+              mainCubeRotation={groupRef.current ? groupRef.current.rotation : { x: 0, y: 0, z: 0 }}
+              resetTrigger={resetTrigger}
+            />
+          </div>
         </CubeContainer>
         
         <Controls 
@@ -220,6 +264,8 @@ function App() {
           setIsRotating={setIsRotating}
           autoRotate={autoRotate}
           setAutoRotate={setAutoRotate}
+          enableMouseRotation={enableMouseRotation}
+          setEnableMouseRotation={setEnableMouseRotation}
           onScramble={handleScramble}
           onReset={handleReset}
           onSolve={handleSolve}

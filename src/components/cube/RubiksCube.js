@@ -47,7 +47,7 @@ const CameraReset = ({ onCameraReset }) => {
 };
 
 // Main Rubik's Cube component
-export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, onResetRef, onGroupRef, onCameraReset }) {
+export function RubiksCube({ isRotating, autoRotate = false, enableMouseRotation = true, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, onResetRef, onGroupRef, onCameraReset }) {
   return (
     <Canvas
       camera={{ position: [5, 5, 5], fov: 50 }}
@@ -237,6 +237,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               solve={solve}
               isRotating={isRotating}
               autoRotate={autoRotate}
+              enableMouseRotation={enableMouseRotation}
               onScramble={onScramble}
               onReset={onReset}
               onSolve={onSolve}
@@ -259,7 +260,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
         }}
         enablePan={true} 
         enableZoom={true} 
-        enableRotate={isRotating} 
+        enableRotate={false} // Disable OrbitControls rotation - we'll use mouse rotation instead
       />
       <Environment preset="sunset" />
     </Canvas>

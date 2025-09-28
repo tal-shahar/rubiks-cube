@@ -159,7 +159,9 @@ function Controls({
   onReset,
   onSolve,
   onRotateFace,
-  cubeState
+  cubeState,
+  enableMouseRotation,
+  setEnableMouseRotation
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -236,6 +238,17 @@ function Controls({
       </ButtonGroup>
 
       <ButtonGroup>
+        <Label>Mouse Rotation:</Label>
+        <ToggleButton
+          $active={enableMouseRotation}
+          onClick={() => setEnableMouseRotation(!enableMouseRotation)}
+        >
+          {enableMouseRotation ? 'ON' : 'OFF'}
+        </ToggleButton>
+      </ButtonGroup>
+
+
+      <ButtonGroup>
         <Label>Face Rotations:</Label>
         <FaceButtonGroup>
           <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
@@ -279,6 +292,33 @@ function Controls({
           {isAnimating ? 'Solving...' : 'Solve'}
         </ActionButton>
       </ButtonGroup>
+      
+      {/* Rotation Controls Info */}
+      <div style={{ 
+        marginTop: '20px', 
+        padding: '15px', 
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+        borderRadius: '10px',
+        textAlign: 'center'
+      }}>
+        <div style={{ 
+          color: 'white', 
+          fontSize: '14px', 
+          fontWeight: '600',
+          marginBottom: '8px'
+        }}>
+          🎮 Rotation Controls
+        </div>
+        <div style={{ 
+          color: 'rgba(255, 255, 255, 0.8)', 
+          fontSize: '12px',
+          lineHeight: '1.4'
+        }}>
+          Drag cube faces to rotate individual faces<br/>
+          Drag the mini cube to rotate the entire cube<br/>
+          Mouse rotation: Drag faces • Mini cube: Whole cube
+        </div>
+      </div>
     </ControlsContainer>
   );
 }

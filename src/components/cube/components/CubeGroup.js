@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { CubePiece } from './CubePiece';
 import { logToTerminal } from '../utils/logger';
 import { getOriginalPosition } from '../utils/colors';
+import { useFaceDragRotation } from '../hooks/useFaceDragRotation';
 
 // Main cube group component with enhanced structure
 export function CubeGroup({ 
@@ -16,6 +18,7 @@ export function CubeGroup({
   solve, 
   isRotating, 
   autoRotate = false, 
+  enableMouseRotation = true,
   onScramble, 
   onReset, 
   onSolve, 
@@ -66,6 +69,42 @@ export function CubeGroup({
   }
   const groupRef = useRef();
   const [rotationSpeed] = useState({ x: 0.005, y: 0.01 });
+  
+  // Face drag rotation hook
+  const faceDragRotation = useFaceDragRotation();
+  
+  // Global mouse up handler using document event listener
+  React.useEffect(() => {
+    if (!enableMouseRotation) return;
+    
+    const handleGlobalMouseUp = (event) => {
+      // Only handle if we have an active drag
+      if (faceDragRotation.isDragging) {
+        console.log('🎯 Document global mouse up detected');
+        // Create a mock event object that matches R3F event structure
+        const mockEvent = {
+          gl: { domElement: event.target },
+          nativeEvent: event
+        };
+        
+        if (!isAnimating) {
+          faceDragRotation.handleMouseUp(mockEvent, event.target, rotateFaceWithAnimation);
+        } else {
+          console.log('🎯 Global mouse up ignored - animation in progress');
+        }
+      }
+    };
+    
+    // Add document-level mouse up listener
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+    document.addEventListener('pointerup', handleGlobalMouseUp);
+    
+    return () => {
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+      document.removeEventListener('pointerup', handleGlobalMouseUp);
+    };
+  }, [enableMouseRotation, faceDragRotation, isAnimating, rotateFaceWithAnimation]);
+
   
   // Set up refs for parent component
   React.useEffect(() => {
@@ -123,6 +162,84 @@ export function CubeGroup({
       }
     };
   }, [autoRotate, rotationSpeed]);
+
+  // Face event handler for individual face interactions
+  const handleFaceEvent = useCallback((eventType, event) => {
+    if (!enableMouseRotation || autoRotate || isAnimating) return;
+    
+    console.log(`🎯 Face event: ${eventType}`);
+    
+    // Access canvas through the gl.domElement from the event
+    const canvas = event.gl?.domElement || event.nativeEvent?.target;
+    if (!canvas) return;
+    
+    switch (eventType) {
+      case 'F':
+      case 'B':
+      case 'R':
+      case 'L':
+      case 'U':
+      case 'D':
+        // Face click - start drag
+        console.log(`🎯 Face clicked: ${eventType}`);
+        faceDragRotation.handleMouseDown(event, canvas, eventType);
+        break;
+        
+      case 'MOVE':
+        // Mouse move - continue drag
+        faceDragRotation.handleMouseMove(event, canvas);
+        break;
+        
+      case 'UP':
+        // Mouse up - complete drag
+        console.log(`🎯 Face mouse up`);
+        // Only process if we're not already animating
+        if (!isAnimating) {
+          faceDragRotation.handleMouseUp(event, canvas, rotateFaceWithAnimation);
+        } else {
+          console.log(`🎯 Mouse up ignored - animation in progress`);
+        }
+        break;
+        
+      default:
+        console.log(`🎯 Unknown face event type: ${eventType}`);
+    }
+  }, [enableMouseRotation, autoRotate, isAnimating, faceDragRotation, rotateFaceWithAnimation]);
+
+  // Mouse move and up handlers for drag completion
+  const handlePointerMove = useCallback((event) => {
+    if (!enableMouseRotation || autoRotate || isAnimating) return;
+    
+    // Access canvas through the gl.domElement from the event
+    const canvas = event.gl?.domElement || event.nativeEvent?.target;
+    if (canvas) {
+      faceDragRotation.handleMouseMove(event, canvas);
+    }
+  }, [enableMouseRotation, autoRotate, isAnimating, faceDragRotation]);
+
+  const handlePointerUp = useCallback((event) => {
+    if (!enableMouseRotation || autoRotate || isAnimating) return;
+    
+    console.log('🎯 CubeGroup handlePointerUp called');
+    
+    // Access canvas through the gl.domElement from the event
+    const canvas = event.gl?.domElement || event.nativeEvent?.target;
+    if (canvas) {
+      console.log('🎯 Calling faceDragRotation.handleMouseUp with rotateFace:', !!rotateFace);
+      // Pass the rotateFace function to apply the rotation
+      faceDragRotation.handleMouseUp(event, canvas, rotateFace);
+    }
+  }, [enableMouseRotation, autoRotate, isAnimating, faceDragRotation, rotateFace]);
+
+  const handlePointerLeave = useCallback((event) => {
+    if (!enableMouseRotation || autoRotate || isAnimating) return;
+    
+    // Access canvas through the gl.domElement from the event
+    const canvas = event.gl?.domElement || event.nativeEvent?.target;
+    if (canvas) {
+      faceDragRotation.handleMouseLeave(event, canvas);
+    }
+  }, [enableMouseRotation, autoRotate, isAnimating, faceDragRotation]);
 
   // Manual rotation is now handled by OrbitControls in the main component
 
@@ -199,6 +316,7 @@ export function CubeGroup({
         pieceId={pieceId}
         rotatingFace={rotatingFace}
         rotationProgress={rotationProgress}
+        onFaceClick={handleFaceEvent}
       />
     );
 
@@ -222,7 +340,26 @@ export function CubeGroup({
   }
 
   return (
-    <group ref={setGroupRef}>
+    <group 
+      ref={setGroupRef}
+      onPointerEnter={enableMouseRotation ? (event) => {
+        // Access canvas through the gl.domElement from the event
+        const canvas = event.gl?.domElement || event.nativeEvent?.target;
+        if (canvas && !autoRotate && !isAnimating) {
+          canvas.style.cursor = 'grab';
+        }
+      } : undefined}
+      onPointerUp={enableMouseRotation ? (event) => {
+        // Global mouse up handler - works even when mouse is released outside cube faces
+        console.log('🎯 Global mouse up detected');
+        const canvas = event.gl?.domElement || event.nativeEvent?.target;
+        if (canvas && !isAnimating) {
+          faceDragRotation.handleMouseUp(event, canvas, rotateFaceWithAnimation);
+        } else if (isAnimating) {
+          console.log('🎯 Global mouse up ignored - animation in progress');
+        }
+      } : undefined}
+    >
       {/* Non-rotating pieces */}
       {nonRotatingPieces}
       

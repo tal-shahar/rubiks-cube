@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useCallback } from 'react';
 import * as THREE from 'three';
 
 // Individual cube piece component with smooth rotation
-export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotatingFace = null, rotationProgress = 0 }) {
+export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotatingFace = null, rotationProgress = 0, onFaceClick = null }) {
   const meshRef = useRef();
   const groupRef = useRef();
   
@@ -146,6 +146,21 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
   // For group rotation, individual pieces don't need to rotate - the group handles it
   // Just use the original position without any offsets or individual rotations
   const finalPosition = position;
+
+  // Map face index to face name
+  const getFaceName = useCallback((faceIndex) => {
+    const faceNames = ['F', 'B', 'R', 'L', 'U', 'D'];
+    return faceNames[faceIndex];
+  }, []);
+
+  // Handle face click
+  const handleFaceClick = useCallback((faceIndex, event) => {
+    if (onFaceClick) {
+      const faceName = getFaceName(faceIndex);
+      console.log(`🎯 Face clicked: ${faceName} on piece ${pieceId}`);
+      onFaceClick(faceName, event);
+    }
+  }, [onFaceClick, getFaceName, pieceId]);
   
   // Debug: Log when position changes for key pieces - DISABLED
   // if (pieceId === 25 || pieceId === 17 || pieceId === 0) {
@@ -225,6 +240,19 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
             position={facePosition}
             rotation={faceRotation}
             geometry={faceGeometry}
+            onPointerDown={(event) => handleFaceClick(faceIndex, event)}
+            onPointerMove={(event) => {
+              // Pass through to parent for drag handling
+              if (onFaceClick) {
+                onFaceClick('MOVE', event);
+              }
+            }}
+            onPointerUp={(event) => {
+              // Pass through to parent for drag completion
+              if (onFaceClick) {
+                onFaceClick('UP', event);
+              }
+            }}
           >
             <meshPhongMaterial 
               color={displayColor} 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { logRotationStep, logToTerminal } from '../utils/logger';
 import { getOriginalColors } from '../utils/colors';
 
@@ -353,13 +353,24 @@ export const applyRotation = (pieces, face, direction) => {
 
 // Custom hook for rotation functionality
 export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated) {
+  // Guard against multiple simultaneous rotations
+  const isRotatingRef = useRef(false);
 
   // Function to rotate a face with smooth 3D animation
   const rotateFaceWithAnimation = useCallback((face, direction, onComplete) => {
+    // Prevent multiple simultaneous rotations
+    if (isRotatingRef.current) {
+      console.log(`🚫 BLOCKED: Rotation already in progress - ignoring ${face} ${direction}`);
+      return;
+    }
+    
     // console.log(`🎯🎯🎯 FUNCTION ACTIVATED: rotateFaceWithAnimation called: ${face} ${direction} 🎯🎯🎯`);
     logToTerminal(`🎯🎯🎯 FUNCTION ACTIVATED: rotateFaceWithAnimation called`, { face, direction }, 'INFO');
     
     // console.log(`🎯 Rotating face ${face} ${direction} with smooth animation`);
+    
+    // Set rotation guard
+    isRotatingRef.current = true;
     
     // Set animation state
     setIsAnimating(true);
@@ -436,6 +447,9 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
         setRotationProgress(0);
         setIsAnimating(false);
         setHasRotated(true); // Mark that rotation has occurred
+        
+        // Reset rotation guard to allow future rotations
+        isRotatingRef.current = false;
         
         // console.log('🎯 ROTATION COMPLETED - State should be updated');
         // Get current state to verify rotation was applied
