@@ -26,6 +26,16 @@ try {
     console.log('🔧 Service worker version updated');
   }
   
+  // Update HTML file with version and build time
+  const htmlPath = path.join('build', 'index.html');
+  if (fs.existsSync(htmlPath)) {
+    let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+    htmlContent = htmlContent.replace(/content="\d+\.\d+\.\d+"/g, `content="${version}"`);
+    htmlContent = htmlContent.replace(/content="\d{4}-\d{2}-\d{2}T[\d:.-]+Z"/g, `content="${buildTime}"`);
+    fs.writeFileSync(htmlPath, htmlContent);
+    console.log('🔧 HTML version meta tags updated');
+  }
+  
   console.log('✅ Build completed successfully!');
   console.log(`📦 Version: ${version}`);
   console.log(`⏰ Build time: ${buildTime}`);

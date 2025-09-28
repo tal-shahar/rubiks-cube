@@ -1,4 +1,5 @@
 const { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const { CloudFrontClient, CreateInvalidationCommand } = require('@aws-sdk/client-cloudfront');
 const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
@@ -20,6 +21,17 @@ const s3Client = new S3Client({
   region: AWS_REGION,
   // In GitHub Actions, credentials are automatically provided by the configure-aws-credentials action
   // For local development, you can set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    }
+  } : {})
+});
+
+// Initialize CloudFront client
+const cloudFrontClient = new CloudFrontClient({
+  region: AWS_REGION,
   ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
     credentials: {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -82,6 +94,40 @@ function getCacheControl(filePath) {
   
   // Default - no cache
   return 'no-cache, no-store, must-revalidate';
+}
+
+// Function to create CloudFront invalidation
+async function createCloudFrontInvalidation() {
+  if (!CLOUDFRONT_DISTRIBUTION_ID) {
+    console.log('⚠️ No CloudFront distribution ID provided, skipping invalidation');
+    return;
+  }
+
+  try {
+    console.log('🔄 Creating CloudFront invalidation...');
+    
+    const invalidationParams = {
+      DistributionId: CLOUDFRONT_DISTRIBUTION_ID,
+      InvalidationBatch: {
+        CallerReference: `rubiks-cube-${version}-${Date.now()}`,
+        Paths: {
+          Quantity: 1,
+          Items: ['/*'] // Invalidate all paths
+        }
+      }
+    };
+
+    const command = new CreateInvalidationCommand(invalidationParams);
+    const result = await cloudFrontClient.send(command);
+    
+    console.log('✅ CloudFront invalidation created successfully!');
+    console.log(`🆔 Invalidation ID: ${result.Invalidation.Id}`);
+    console.log('⏳ Invalidation typically takes 5-15 minutes to complete');
+    
+  } catch (error) {
+    console.error('❌ Failed to create CloudFront invalidation:', error.message);
+    console.log('💡 You may need to manually invalidate CloudFront cache');
+  }
 }
 
 // Function to get all files in a directory recursively
@@ -197,7 +243,9 @@ async function deployToS3() {
       
       if (CLOUDFRONT_DISTRIBUTION_ID) {
         console.log(`☁️  CloudFront URL: https://${CLOUDFRONT_DISTRIBUTION_ID}.cloudfront.net`);
-        console.log('⚠️  Note: CloudFront cache may take a few minutes to update');
+        
+        // Create CloudFront invalidation to clear cache
+        await createCloudFrontInvalidation();
       }
     } else {
       console.log('\n⚠️  Deployment completed with errors');

@@ -13,7 +13,8 @@
     "serve": "npx serve -s build",
     "log-server": "node log-server.js",
     "monitor-logs": "node monitor-logs.js",
-    "dev": "concurrently \"npm run log-server\" \"npm start\""
+    "dev": "concurrently \"npm run log-server\" \"npm start\"",
+    "invalidate-cache": "node invalidate-cloudfront.js"
   },
   "dependencies": {
     "@react-three/drei": "^9.88.13",
@@ -37,6 +38,7 @@
     ]
   },
   "devDependencies": {
+    "@aws-sdk/client-cloudfront": "^3.490.0",
     "@aws-sdk/client-s3": "^3.490.0",
     "@aws-sdk/s3-request-presigner": "^3.490.0",
     "@craco/craco": "^7.1.0",
