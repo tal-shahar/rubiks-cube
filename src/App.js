@@ -54,7 +54,7 @@ const CubeContainer = styled.div`
 `;
 
 function App() {
-  const [isRotating, setIsRotating] = useState(false);
+  const [isRotating, setIsRotating] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
   const [isScrambling, setIsScrambling] = useState(false);
   const [currentScramble, setCurrentScramble] = useState('');

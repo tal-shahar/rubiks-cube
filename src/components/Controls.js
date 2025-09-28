@@ -84,9 +84,10 @@ const SettingsButton = styled(Button)`
 
 const ButtonGroup = styled.div`
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
+  margin-bottom: 15px;
 `;
 
 const FaceButton = styled(Button)`
@@ -193,10 +194,12 @@ const FaceButtonGroup = styled.div`
   margin: 0 auto;
 `;
 
-const Label = styled.span`
+const Label = styled.h3`
   color: white;
   font-weight: 600;
-  margin-right: 10px;
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  text-align: center;
 `;
 
 function Controls({ 
@@ -268,27 +271,7 @@ function Controls({
     <ControlsContainer>
 
       <ButtonGroup>
-        <Label>Auto Rotate:</Label>
-        <ToggleButton
-          $active={autoRotate}
-          onClick={() => setAutoRotate(!autoRotate)}
-        >
-          {autoRotate ? 'ON' : 'OFF'}
-        </ToggleButton>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <Label>Manual Rotate:</Label>
-        <ToggleButton
-          $active={isRotating}
-          onClick={() => setIsRotating(!isRotating)}
-        >
-          {isRotating ? 'ON' : 'OFF'}
-        </ToggleButton>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <Label>Face Rotations:</Label>
+        <Label>Face Rotations</Label>
         <FaceButtonGroup>
           <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
           <FButton onClick={() => handleFaceRotation('F', 'clockwise')}>F</FButton>
@@ -300,7 +283,7 @@ function Controls({
       </ButtonGroup>
 
       <ButtonGroup>
-        <Label>Counter-Clockwise:</Label>
+        <Label>Counter-Clockwise</Label>
         <FaceButtonGroup>
           <RButton onClick={() => handleFaceRotation('R', 'counterclockwise')}>R'</RButton>
           <FButton onClick={() => handleFaceRotation('F', 'counterclockwise')}>F'</FButton>
@@ -312,7 +295,7 @@ function Controls({
       </ButtonGroup>
 
       <ButtonGroup>
-        <Label>Middle Rotations:</Label>
+        <Label>Middle Rotations</Label>
         <FaceButtonGroup>
           <MButton onClick={() => handleFaceRotation('M', 'clockwise')}>M</MButton>
           <EButton onClick={() => handleFaceRotation('E', 'clockwise')}>E</EButton>
@@ -321,7 +304,7 @@ function Controls({
       </ButtonGroup>
 
       <ButtonGroup>
-        <Label>Middle Counter-Clockwise:</Label>
+        <Label>Middle Counter-Clockwise</Label>
         <FaceButtonGroup>
           <MButton onClick={() => handleFaceRotation('M', 'counterclockwise')}>M'</MButton>
           <EButton onClick={() => handleFaceRotation('E', 'counterclockwise')}>E'</EButton>
@@ -348,6 +331,21 @@ function Controls({
         >
           {isAnimating ? 'Solving...' : 'Solve'}
         </ActionButton>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        <ToggleButton
+          $active={autoRotate}
+          onClick={() => setAutoRotate(!autoRotate)}
+        >
+          Auto Rotate: {autoRotate ? 'ON' : 'OFF'}
+        </ToggleButton>
+        <ToggleButton
+          $active={isRotating}
+          onClick={() => setIsRotating(!isRotating)}
+        >
+          Manual Rotate: {isRotating ? 'ON' : 'OFF'}
+        </ToggleButton>
       </ButtonGroup>
 
       {isKeyboardDevice && (
