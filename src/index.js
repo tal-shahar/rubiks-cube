@@ -17,16 +17,16 @@ if ('serviceWorker' in navigator) {
       .then((registration) => {
         console.log('🔧 Service Worker registered successfully:', registration.scope);
         
-        // Check for updates
+        // Check for updates silently
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing;
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('🆕 New version available! Reload to update.');
-              // Optionally show update notification
-              if (window.confirm('A new version is available! Reload to get the latest features?')) {
+              console.log('🆕 New version available! Updating silently...');
+              // Silent reload - no prompts
+              setTimeout(() => {
                 window.location.reload();
-              }
+              }, 500);
             }
           });
         });

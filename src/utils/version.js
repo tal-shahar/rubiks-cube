@@ -71,8 +71,8 @@ export const clearCaches = () => {
   }
 };
 
-// Force reload with cache busting
-export const forceReload = () => {
+// Silent reload with cache busting (for manual use if needed)
+export const silentReload = () => {
   const url = new URL(window.location);
   url.searchParams.set('v', VERSION);
   url.searchParams.set('t', Date.now().toString());
@@ -81,14 +81,29 @@ export const forceReload = () => {
 
 // Initialize version checking
 export const initializeVersionCheck = () => {
+  // Check if we're already in a reload loop
+  const reloadCount = parseInt(sessionStorage.getItem('reload-count') || '0');
+  if (reloadCount > 2) {
+    console.log('🔄 Too many reloads, stopping version check');
+    sessionStorage.removeItem('reload-count');
+    return;
+  }
+
   if (isNewVersion()) {
     console.log('🆕 New version detected:', VERSION);
     clearCaches();
     
-    // Show update notification (optional)
-    if (window.confirm('A new version is available! Reload to get the latest features?')) {
-      forceReload();
-    }
+    // Increment reload counter
+    sessionStorage.setItem('reload-count', (reloadCount + 1).toString());
+    
+    // Silent reload - no prompts, just provide latest version
+    console.log('🔄 Silently updating to latest version...');
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  } else {
+    // Reset reload counter if no new version
+    sessionStorage.removeItem('reload-count');
   }
 };
 
