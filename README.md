@@ -29,6 +29,8 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 - ⌨️ **Keyboard Controls**: Use keyboard shortcuts for face rotations
 - 🎯 **Manual Face Rotation**: Individual face rotation controls
 - 🔄 **Reset & Solve**: Reset to solved state or auto-solve functionality
+- ⚙️ **Custom Keybindings**: Customize keyboard shortcuts for any rotation
+- 🔧 **Middle Layer Rotations**: M, E, S rotations for advanced cube manipulation
 
 ## Technologies Used
 
@@ -122,6 +124,8 @@ src/
 - **Right-click + Drag**: Pan the view (if enabled)
 
 #### Keyboard Shortcuts
+
+**Standard Face Rotations:**
 - **R** - Rotate Right face clockwise
 - **Shift + R** - Rotate Right face counter-clockwise
 - **L** - Rotate Left face clockwise
@@ -135,6 +139,19 @@ src/
 - **B** - Rotate Back face clockwise
 - **Shift + B** - Rotate Back face counter-clockwise
 
+**Middle Layer Rotations:**
+- **M** - Rotate Middle layer clockwise (between L and R faces)
+- **Shift + M** - Rotate Middle layer counter-clockwise
+- **E** - Rotate Equatorial layer clockwise (between U and D faces)
+- **Shift + E** - Rotate Equatorial layer counter-clockwise
+- **S** - Rotate Standing layer clockwise (between F and B faces)
+- **Shift + S** - Rotate Standing layer counter-clockwise
+
+**Custom Keybindings:**
+- Click "⚙️ Customize Keys" to map any key or key combination to any rotation
+- Supports single keys, modifier combinations (Ctrl, Alt, Shift, Cmd)
+- Settings are saved in browser cookies and persist between sessions
+
 ### 🎛️ Control Panel Features
 
 #### Toggle Controls
@@ -142,14 +159,24 @@ src/
 - **Manual Rotate**: Enables manual rotation mode for precise control
 
 #### Face Rotation Buttons
-- **Clockwise Rotations**: R, F, B, L, U, D buttons for clockwise face rotations
+- **Standard Face Rotations**: R, F, B, L, U, D buttons for clockwise face rotations
 - **Counter-Clockwise Rotations**: R', F', B', L', U', D' buttons for counter-clockwise rotations
+- **Middle Layer Rotations**: M, E, S buttons for middle layer rotations (clockwise and counter-clockwise)
 - **Color-coded Buttons**: Each face button is color-coded to match the cube's face colors
 
 #### Action Buttons
 - **Reset**: Returns the cube to its solved state and resets camera position
 - **Scramble**: Generates a random scramble sequence using proper Rubik's cube notation
 - **Solve**: Automatically solves the cube (when implemented)
+
+#### Keybinding Customization
+- **Customize Keys Button**: Click "⚙️ Customize Keys" to open the keybinding modal
+- **Custom Key Mappings**: Map any key or key combination to any face rotation
+- **Supported Rotations**: All standard faces (R, L, U, D, F, B) and middle layers (M, E, S)
+- **Key Combination Support**: Single keys, modifier combinations (Ctrl, Alt, Shift, Cmd)
+- **Persistent Storage**: Settings saved in browser cookies and persist between sessions
+- **Conflict Detection**: Real-time feedback for key conflicts
+- **Reset to Default**: One-click reset to default keybindings
 
 ### 📊 Information Panel
 
@@ -179,12 +206,19 @@ src/
 - Visual feedback showing scramble progress
 
 ### Face Notation
+
+**Standard Faces:**
 - **F**: Front face (white)
 - **B**: Back face (yellow)
 - **R**: Right face (red)
 - **L**: Left face (orange)
 - **U**: Up face (blue)
 - **D**: Down face (green)
+
+**Middle Layers:**
+- **M**: Middle layer (between L and R faces, purple)
+- **E**: Equatorial layer (between U and D faces, pink)
+- **S**: Standing layer (between F and B faces, cyan)
 
 ## Usage Guide
 
@@ -200,9 +234,11 @@ src/
 1. **Basic Navigation**: Drag the mouse to rotate the cube view
 2. **Zoom Control**: Use mouse scroll to zoom in/out
 3. **Face Rotation**: Click the colored face buttons or use keyboard shortcuts
-4. **Auto Rotation**: Toggle the "Auto Rotate" button to see continuous rotation
-5. **Scrambling**: Click "Scramble" to see a random scramble sequence
-6. **Reset**: Click "Reset" to return to the solved state
+4. **Middle Layer Rotations**: Try the M, E, S buttons for advanced rotations
+5. **Custom Keybindings**: Click "⚙️ Customize Keys" to set up your preferred shortcuts
+6. **Auto Rotation**: Toggle the "Auto Rotate" button to see continuous rotation
+7. **Scrambling**: Click "Scramble" to see a random scramble sequence
+8. **Reset**: Click "Reset" to return to the solved state
 
 ## Features in Detail
 
@@ -219,6 +255,8 @@ src/
 - **Toggle buttons** for different rotation modes (auto/manual)
 - **Color-coded face buttons** matching cube face colors
 - **Keyboard shortcuts** for quick face rotations
+- **Middle layer rotation buttons** for advanced cube manipulation
+- **Custom keybinding system** with persistent storage
 - **Responsive design** that works on all screen sizes
 - **Real-time status display** showing current operations
 
@@ -229,6 +267,15 @@ src/
 - **Professional color scheme** with proper contrast
 - **Information panel** with educational content
 - **Loading states** for better user feedback
+
+### Keybinding Customization
+- **Custom key mapping** for any key or key combination
+- **Browser cookie storage** for persistent settings
+- **Real-time conflict detection** to prevent duplicate mappings
+- **Modifier key support** (Ctrl, Alt, Shift, Cmd)
+- **One-click reset** to default keybindings
+- **Intuitive modal interface** for easy customization
+- **Cross-platform compatibility** with proper key handling
 
 ### Technical Implementation
 - **React Three Fiber** for seamless Three.js integration
@@ -256,6 +303,12 @@ src/
 - **Check focus**: Make sure the browser window is focused for keyboard shortcuts
 - **Try different browsers**: Some browsers may have different WebGL implementations
 - **Disable browser extensions**: Some extensions may interfere with WebGL
+
+#### Keybinding Issues
+- **Check cookie permissions**: Ensure browser allows cookies for keybinding storage
+- **Verify key mappings**: Check the customization modal for proper key assignments
+- **Reset to defaults**: Use the reset button in the keybinding modal if keys stop working
+- **Check for conflicts**: The modal will show if any keys are mapped to multiple functions
 
 ### Browser Compatibility
 - **Chrome**: Full support (recommended)
