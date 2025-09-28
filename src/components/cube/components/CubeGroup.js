@@ -140,6 +140,9 @@ export function CubeGroup({
       case 'D': return y === -1;
       case 'F': return z === 1;
       case 'B': return z === -1;
+      case 'M': return x === 0; // Middle layer (between L and R faces)
+      case 'E': return y === 0; // Equatorial layer (between U and D faces)
+      case 'S': return z === 0; // Standing layer (between F and B faces)
       default: return false;
     }
   }, []);
@@ -155,7 +158,7 @@ export function CubeGroup({
     const angle = (Math.PI / 2) * rotationProgress * sign; // 90 degrees total
 
     // Log rotation angle calculation
-    // console.log(`🎯 getRotationAngle: ${face} ${direction} - progress: ${rotationProgress.toFixed(3)}, angle: ${angle.toFixed(3)}`);
+    console.log(`🎯 getRotationAngle: ${face} ${direction} - progress: ${rotationProgress.toFixed(3)}, angle: ${angle.toFixed(3)}`);
     logToTerminal(`🎯 getRotationAngle`, { face, direction, progress: rotationProgress.toFixed(3), angle: angle.toFixed(3) }, 'INFO');
 
     switch (face) {
@@ -165,6 +168,9 @@ export function CubeGroup({
       case 'L': return { x: -angle, y: 0, z: 0 };
       case 'U': return { x: 0, y: angle, z: 0 };
       case 'D': return { x: 0, y: -angle, z: 0 };
+      case 'M': return { x: angle, y: 0, z: 0 }; // Middle layer rotates around X axis (same as R)
+      case 'E': return { x: 0, y: angle, z: 0 }; // Equatorial layer rotates around Y axis (same as U)
+      case 'S': return { x: 0, y: 0, z: angle }; // Standing layer rotates around Z axis (same as F)
       default: return { x: 0, y: 0, z: 0 };
     }
   }, [isPartOfRotatingFace]);

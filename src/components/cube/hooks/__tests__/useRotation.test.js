@@ -327,6 +327,170 @@ describe('Rotation Logic', () => {
       });
     });
 
+    describe('Middle layer rotation (M)', () => {
+      it('should rotate middle layer pieces clockwise correctly', () => {
+        // Move pieces to middle layer (x = 0)
+        mockPieces[0].position = [0, 1, 1];
+        mockPieces[1].position = [0, 0, 1];
+        mockPieces[2].position = [0, -1, 1];
+        
+        applyRotation(mockPieces, 'M', 'clockwise');
+        
+        // Middle layer pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([0, -1, 1]); // [0,1,1] -> [0,-1,1]
+        expect(mockPieces[1].position).toEqualPosition([0, -1, 0]); // [0,0,1] -> [0,-1,0]
+        expect(mockPieces[2].position).toEqualPosition([0, -1, -1]); // [0,-1,1] -> [0,-1,-1]
+        
+        // Non-middle layer piece should not move
+        expect(mockPieces[3].position).toEqual([1, 1, -1]);
+      });
+
+      it('should rotate middle layer pieces counterclockwise correctly', () => {
+        // Move pieces to middle layer (x = 0)
+        mockPieces[0].position = [0, 1, 1];
+        mockPieces[1].position = [0, 0, 1];
+        mockPieces[2].position = [0, -1, 1];
+        
+        applyRotation(mockPieces, 'M', 'counterclockwise');
+        
+        // Middle layer pieces should be rotated counterclockwise
+        expect(mockPieces[0].position).toEqualPosition([0, 1, -1]); // [0,1,1] -> [0,1,-1]
+        expect(mockPieces[1].position).toEqualPosition([0, 1, 0]); // [0,0,1] -> [0,1,0]
+        expect(mockPieces[2].position).toEqualPosition([0, 1, 1]); // [0,-1,1] -> [0,1,1]
+      });
+    });
+
+    describe('Equatorial layer rotation (E)', () => {
+      it('should rotate equatorial layer pieces clockwise correctly', () => {
+        // Move pieces to equatorial layer (y = 0)
+        mockPieces[0].position = [1, 0, 1];
+        mockPieces[1].position = [0, 0, 1];
+        mockPieces[2].position = [-1, 0, 1];
+        
+        applyRotation(mockPieces, 'E', 'clockwise');
+        
+        // Equatorial layer pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([1, 0, -1]); // [1,0,1] -> [1,0,-1]
+        expect(mockPieces[1].position).toEqualPosition([1, 0, 0]); // [0,0,1] -> [1,0,0]
+        expect(mockPieces[2].position).toEqualPosition([1, 0, 1]); // [-1,0,1] -> [1,0,1]
+        
+        // Non-equatorial layer piece should not move
+        expect(mockPieces[3].position).toEqual([1, 1, -1]);
+      });
+
+      it('should rotate equatorial layer pieces counterclockwise correctly', () => {
+        // Move pieces to equatorial layer (y = 0)
+        mockPieces[0].position = [1, 0, 1];
+        mockPieces[1].position = [0, 0, 1];
+        mockPieces[2].position = [-1, 0, 1];
+        
+        applyRotation(mockPieces, 'E', 'counterclockwise');
+        
+        // Equatorial layer pieces should be rotated counterclockwise
+        expect(mockPieces[0].position).toEqualPosition([-1, 0, 1]); // [1,0,1] -> [-1,0,1]
+        expect(mockPieces[1].position).toEqualPosition([-1, 0, 0]); // [0,0,1] -> [-1,0,0]
+        expect(mockPieces[2].position).toEqualPosition([-1, 0, -1]); // [-1,0,1] -> [-1,0,-1]
+      });
+    });
+
+    describe('Standing layer rotation (S)', () => {
+      it('should rotate standing layer pieces clockwise correctly', () => {
+        // Move pieces to standing layer (z = 0)
+        mockPieces[0].position = [1, 1, 0];
+        mockPieces[1].position = [0, 1, 0];
+        mockPieces[2].position = [-1, 1, 0];
+        
+        applyRotation(mockPieces, 'S', 'clockwise');
+        
+        // Standing layer pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([1, -1, 0]); // [1,1,0] -> [1,-1,0]
+        expect(mockPieces[1].position).toEqualPosition([1, 0, 0]); // [0,1,0] -> [1,0,0]
+        expect(mockPieces[2].position).toEqualPosition([1, 1, 0]); // [-1,1,0] -> [1,1,0]
+        
+        // Non-standing layer piece should not move
+        expect(mockPieces[3].position).toEqual([1, 1, -1]);
+      });
+
+      it('should rotate standing layer pieces counterclockwise correctly', () => {
+        // Move pieces to standing layer (z = 0)
+        mockPieces[0].position = [1, 1, 0];
+        mockPieces[1].position = [0, 1, 0];
+        mockPieces[2].position = [-1, 1, 0];
+        
+        applyRotation(mockPieces, 'S', 'counterclockwise');
+        
+        // Standing layer pieces should be rotated counterclockwise
+        expect(mockPieces[0].position).toEqualPosition([-1, 1, 0]); // [1,1,0] -> [-1,1,0]
+        expect(mockPieces[1].position).toEqualPosition([-1, 0, 0]); // [0,1,0] -> [-1,0,0]
+        expect(mockPieces[2].position).toEqualPosition([-1, -1, 0]); // [-1,1,0] -> [-1,-1,0]
+      });
+    });
+
+    describe('Middle rotation color transformations', () => {
+      it('should apply correct color transformations for M rotation', () => {
+        const testPiece = {
+          pieceId: 0,
+          position: [0, 1, 1], // Middle layer piece
+          colors: { front: 'white', back: 'yellow', right: 'red', left: 'orange', top: 'blue', bottom: 'green' },
+          rotationHistory: []
+        };
+        
+        applyRotation([testPiece], 'M', 'clockwise');
+        
+        // Colors should be rotated (same as R rotation)
+        expect(testPiece.colors).toEqual({
+          front: 'blue',   // top -> front
+          back: 'green',   // bottom -> back  
+          right: 'red',    // right stays right
+          left: 'orange',  // left stays left
+          top: 'yellow',   // back -> top
+          bottom: 'white'  // front -> bottom
+        });
+      });
+
+      it('should apply correct color transformations for E rotation', () => {
+        const testPiece = {
+          pieceId: 0,
+          position: [1, 0, 1], // Equatorial layer piece
+          colors: { front: 'white', back: 'yellow', right: 'red', left: 'orange', top: 'blue', bottom: 'green' },
+          rotationHistory: []
+        };
+        
+        applyRotation([testPiece], 'E', 'clockwise');
+        
+        // Colors should be rotated (E rotation logic)
+        expect(testPiece.colors).toEqual({
+          front: 'orange', // left -> front
+          back: 'red',     // right -> back
+          right: 'white',  // front -> right
+          left: 'yellow',  // back -> left
+          top: 'blue',     // top stays top
+          bottom: 'green'  // bottom stays bottom
+        });
+      });
+
+      it('should apply correct color transformations for S rotation', () => {
+        const testPiece = {
+          pieceId: 0,
+          position: [1, 1, 0], // Standing layer piece
+          colors: { front: 'white', back: 'yellow', right: 'red', left: 'orange', top: 'blue', bottom: 'green' },
+          rotationHistory: []
+        };
+        
+        applyRotation([testPiece], 'S', 'clockwise');
+        
+        // Colors should be rotated (same as F rotation)
+        expect(testPiece.colors).toEqual({
+          front: 'white',  // front stays front
+          back: 'yellow',  // back stays back
+          right: 'green',  // bottom -> right
+          left: 'blue',    // top -> left
+          top: 'red',      // right -> top
+          bottom: 'orange' // left -> bottom
+        });
+      });
+    });
+
     describe('Mathematical correctness', () => {
       it('should apply correct 90-degree rotation transformations', () => {
         // Test that rotations are mathematically correct
@@ -336,7 +500,14 @@ describe('Rotation Logic', () => {
           { face: 'R', direction: 'clockwise', input: [1, 1, 1], expected: [1, -1, 1] },
           { face: 'R', direction: 'counterclockwise', input: [1, 1, 1], expected: [1, 1, -1] },
           { face: 'U', direction: 'clockwise', input: [1, 1, 1], expected: [1, 1, -1] },
-          { face: 'U', direction: 'counterclockwise', input: [1, 1, 1], expected: [-1, 1, 1] }
+          { face: 'U', direction: 'counterclockwise', input: [1, 1, 1], expected: [-1, 1, 1] },
+          // Middle rotation test cases
+          { face: 'M', direction: 'clockwise', input: [0, 1, 1], expected: [0, -1, 1] },
+          { face: 'M', direction: 'counterclockwise', input: [0, 1, 1], expected: [0, 1, -1] },
+          { face: 'E', direction: 'clockwise', input: [1, 0, 1], expected: [1, 0, -1] },
+          { face: 'E', direction: 'counterclockwise', input: [1, 0, 1], expected: [-1, 0, 1] },
+          { face: 'S', direction: 'clockwise', input: [1, 1, 0], expected: [1, -1, 0] },
+          { face: 'S', direction: 'counterclockwise', input: [1, 1, 0], expected: [-1, 1, 0] }
         ];
 
         testCases.forEach(({ face, direction, input, expected }) => {

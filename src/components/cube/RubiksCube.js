@@ -96,7 +96,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
             // DON'T clear move history - keep all previous moves (manual + scramble)
             console.log(`🎲 SCRAMBLING CUBE - Current move history: ${moveHistory.length} moves`);
             
-            const moves = ['F', 'B', 'R', 'L', 'U', 'D'];
+            const moves = ['F', 'B', 'R', 'L', 'U', 'D', 'M', 'E', 'S'];
             const directions = ['clockwise', 'counterclockwise'];
             const scrambleSequence = [];
             

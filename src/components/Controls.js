@@ -136,6 +136,34 @@ const DButton = styled(FaceButton)`
   }
 `;
 
+// Middle rotation buttons
+const MButton = styled(FaceButton)`
+  background: linear-gradient(135deg, #800080 0%, #660066 100%);
+  color: white;
+  
+  &:hover {
+    background: linear-gradient(135deg, #660066 0%, #4D004D 100%);
+  }
+`;
+
+const EButton = styled(FaceButton)`
+  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  color: white;
+  
+  &:hover {
+    background: linear-gradient(135deg, #FF1493 0%, #DC143C 100%);
+  }
+`;
+
+const SButton = styled(FaceButton)`
+  background: linear-gradient(135deg, #00CED1 0%, #008B8B 100%);
+  color: white;
+  
+  &:hover {
+    background: linear-gradient(135deg, #008B8B 0%, #006666 100%);
+  }
+`;
+
 const FaceButtonGroup = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -256,6 +284,24 @@ function Controls({
           <LButton onClick={() => handleFaceRotation('L', 'counterclockwise')}>L'</LButton>
           <UButton onClick={() => handleFaceRotation('U', 'counterclockwise')}>U'</UButton>
           <DButton onClick={() => handleFaceRotation('D', 'counterclockwise')}>D'</DButton>
+        </FaceButtonGroup>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        <Label>Middle Rotations:</Label>
+        <FaceButtonGroup>
+          <MButton onClick={() => handleFaceRotation('M', 'clockwise')}>M</MButton>
+          <EButton onClick={() => handleFaceRotation('E', 'clockwise')}>E</EButton>
+          <SButton onClick={() => handleFaceRotation('S', 'clockwise')}>S</SButton>
+        </FaceButtonGroup>
+      </ButtonGroup>
+
+      <ButtonGroup>
+        <Label>Middle Counter-Clockwise:</Label>
+        <FaceButtonGroup>
+          <MButton onClick={() => handleFaceRotation('M', 'counterclockwise')}>M'</MButton>
+          <EButton onClick={() => handleFaceRotation('E', 'counterclockwise')}>E'</EButton>
+          <SButton onClick={() => handleFaceRotation('S', 'counterclockwise')}>S'</SButton>
         </FaceButtonGroup>
       </ButtonGroup>
 

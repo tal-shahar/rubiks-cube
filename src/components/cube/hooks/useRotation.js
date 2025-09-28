@@ -66,6 +66,34 @@ function applyPositionTransformation(position, face, direction) {
         newZ = -x;
       }
       break;
+    // Middle piece rotations
+    case 'M': // Middle layer rotation (between L and R faces, X=0 plane)
+      if (direction === 'clockwise') {
+        newY = -z;
+        newZ = y;
+      } else if (direction === 'counterclockwise') {
+        newY = z;
+        newZ = -y;
+      }
+      break;
+    case 'E': // Equatorial layer rotation (between U and D faces, Y=0 plane)
+      if (direction === 'clockwise') {
+        newX = z;
+        newZ = -x;
+      } else if (direction === 'counterclockwise') {
+        newX = -z;
+        newZ = x;
+      }
+      break;
+    case 'S': // Standing layer rotation (between F and B faces, Z=0 plane)
+      if (direction === 'clockwise') {
+        newX = y;
+        newY = -x;
+      } else if (direction === 'counterclockwise') {
+        newX = -y;
+        newY = x;
+      }
+      break;
   }
   
   return [newX, newY, newZ];
@@ -186,6 +214,58 @@ function applyColorRotation(colors, face, direction) {
         rotatedColors.right = temp;
       }
       break;
+    // Middle piece rotations - these affect the same colors as their corresponding face rotations
+    case 'M': // Middle layer rotation (between L and R faces, X=0 plane)
+      if (direction === 'clockwise') {
+        // Colors rotate clockwise: top->back, back->bottom, bottom->front, front->top
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.back;
+        rotatedColors.back = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.front;
+        rotatedColors.front = temp;
+      } else if (direction === 'counterclockwise') {
+        // Colors rotate counterclockwise: top->front, front->bottom, bottom->back, back->top
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.front;
+        rotatedColors.front = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.back;
+        rotatedColors.back = temp;
+      }
+      break;
+    case 'E': // Equatorial layer rotation (between U and D faces, Y=0 plane)
+      if (direction === 'clockwise') {
+        // Colors rotate clockwise: front->right, right->back, back->left, left->front
+        const temp = rotatedColors.front;
+        rotatedColors.front = rotatedColors.left;
+        rotatedColors.left = rotatedColors.back;
+        rotatedColors.back = rotatedColors.right;
+        rotatedColors.right = temp;
+      } else if (direction === 'counterclockwise') {
+        // Colors rotate counterclockwise: front->left, left->back, back->right, right->front
+        const temp = rotatedColors.front;
+        rotatedColors.front = rotatedColors.right;
+        rotatedColors.right = rotatedColors.back;
+        rotatedColors.back = rotatedColors.left;
+        rotatedColors.left = temp;
+      }
+      break;
+    case 'S': // Standing layer rotation (between F and B faces, Z=0 plane)
+      if (direction === 'clockwise') {
+        // Colors rotate clockwise: top->right, right->bottom, bottom->left, left->top (same as F)
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.right;
+        rotatedColors.right = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.left;
+        rotatedColors.left = temp;
+      } else if (direction === 'counterclockwise') {
+        // Colors rotate counterclockwise: top->left, left->bottom, bottom->right, right->top (same as F)
+        const temp = rotatedColors.top;
+        rotatedColors.top = rotatedColors.left;
+        rotatedColors.left = rotatedColors.bottom;
+        rotatedColors.bottom = rotatedColors.right;
+        rotatedColors.right = temp;
+      }
+      break;
   }
   
   // Debug logging for piece 17 - DISABLED
@@ -220,6 +300,9 @@ export const applyRotation = (pieces, face, direction) => {
       case 'L': return x === -1; // Left face
       case 'U': return y === 1; // Up face
       case 'D': return y === -1; // Down face
+      case 'M': return x === 0; // Middle layer (between L and R faces)
+      case 'E': return y === 0; // Equatorial layer (between U and D faces)
+      case 'S': return z === 0; // Standing layer (between F and B faces)
       default: return false;
     }
   });
@@ -380,7 +463,7 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
     setRotationProgress(0);
     
     // Smooth animation using requestAnimationFrame
-    const animationDuration = 500; // 500ms for smooth rotation
+    const animationDuration = 1000; // 1000ms for smooth rotation (increased for visibility)
     const startTime = performance.now();
     
     const animate = (currentTime) => {
