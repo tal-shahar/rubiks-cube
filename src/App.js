@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
+import KeybindingModal from './components/KeybindingModal';
+import { useKeybindings } from './hooks/useKeybindings';
+import { useDeviceDetection } from './hooks/useDeviceDetection';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -62,6 +65,48 @@ function App() {
   const rotateFaceRef = useRef();
   const cameraResetRef = useRef();
   const groupRef = useRef();
+
+  // Initialize keybinding system
+  const {
+    keybindings,
+    userKeybindings,
+    hasPermission,
+    isLoading,
+    requestPermissionOnOpen,
+    saveKeybindings,
+    resetKeybindings,
+    handleKeyPress
+  } = useKeybindings();
+
+  // Keybinding modal state
+  const [showKeybindingModal, setShowKeybindingModal] = useState(false);
+  
+  // Device detection
+  const { isKeyboardDevice } = useDeviceDetection();
+
+  const handleOpenKeybindingModal = async () => {
+    // Request permission before opening the modal
+    if (requestPermissionOnOpen) {
+      await requestPermissionOnOpen();
+    }
+    setShowKeybindingModal(true);
+  };
+
+  const handleCloseKeybindingModal = () => {
+    setShowKeybindingModal(false);
+  };
+
+  const handleKeybindingSave = (newKeybindings) => {
+    if (saveKeybindings) {
+      saveKeybindings(newKeybindings);
+    }
+  };
+
+  const handleKeybindingReset = () => {
+    if (resetKeybindings) {
+      resetKeybindings();
+    }
+  };
 
   const handleScramble = () => {
     if (scrambleRef.current) {
@@ -130,54 +175,11 @@ function App() {
     }
   };
 
-  // Add keyboard event handling
+  // Add keyboard event handling with keybinding support
   useEffect(() => {
     const handleKeyDown = (event) => {
-      // console.log('🔑 Keyboard event detected:', event.key, event.shiftKey);
-      
-      // Prevent default behavior for cube rotation keys
-      const rotationKeys = ['r', 'l', 'u', 'd', 'f', 'b'];
-      if (rotationKeys.includes(event.key.toLowerCase())) {
-        event.preventDefault();
-        // console.log('🔑 Prevented default for key:', event.key);
-      }
-
-      // Determine direction based on shift key
-      const direction = event.shiftKey ? 'counterclockwise' : 'clockwise';
-      // console.log('🔑 Direction determined:', direction);
-
-      // Handle cube rotation keys
-      switch (event.key.toLowerCase()) {
-        case 'r':
-          // console.log('🔑 R key pressed - calling handleRotateFace');
-          handleRotateFace('R', direction);
-          break;
-        case 'l':
-          // console.log('🔑 L key pressed - calling handleRotateFace');
-          handleRotateFace('L', direction);
-          break;
-        case 'u':
-          // console.log('🔑 U key pressed - calling handleRotateFace');
-          handleRotateFace('U', direction);
-          break;
-        case 'd':
-          // console.log('🔑 D key pressed - calling handleRotateFace');
-          handleRotateFace('D', direction);
-          break;
-        case 'f':
-          // console.log('🔑 F key pressed - calling handleRotateFace');
-          handleRotateFace('F', direction);
-          break;
-        case 'b':
-          // console.log('🔑 B key pressed - calling handleRotateFace');
-          // console.log('🔑 B key - direction:', direction);
-          // console.log('🔑 B key - rotateFaceRef.current:', !!rotateFaceRef.current);
-          handleRotateFace('B', direction);
-          break;
-        default:
-          // console.log('🔑 Key not recognized:', event.key);
-          break;
-      }
+      // Use the keybinding system to handle key presses
+      handleKeyPress(event, handleRotateFace);
     };
 
     // Add event listener
@@ -189,7 +191,7 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
       // console.log('🔑 Keyboard event listener removed');
     };
-  }, []);
+  }, [handleKeyPress]);
 
 
 
@@ -225,6 +227,7 @@ function App() {
           onSolve={handleSolve}
           onRotateFace={handleRotateFace}
           cubeState={cubeState}
+          onOpenKeybindingModal={handleOpenKeybindingModal}
         />
         
         <InfoPanel 
@@ -232,6 +235,16 @@ function App() {
           isScrambling={isScrambling}
         />
       </MainContent>
+
+      {isKeyboardDevice && (
+        <KeybindingModal
+          isOpen={showKeybindingModal}
+          onClose={handleCloseKeybindingModal}
+          keybindings={userKeybindings}
+          onSaveKeybindings={handleKeybindingSave}
+          onResetKeybindings={handleKeybindingReset}
+        />
+      )}
     </AppContainer>
   );
 }

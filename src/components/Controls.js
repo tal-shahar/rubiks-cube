@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { useDeviceDetection } from '../hooks/useDeviceDetection';
 
 const ControlsContainer = styled.div`
   display: flex;
@@ -58,6 +59,26 @@ const ActionButton = styled(Button)`
       ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)' 
       : 'linear-gradient(135deg, #ff5252 0%, #e74c3c 100%)'};
     transform: ${props => props.disabled ? 'none' : 'translateY(-2px)'};
+  }
+`;
+
+const SettingsButton = styled(Button)`
+  min-width: 120px;
+  background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+  color: white;
+  
+  &:hover {
+    background: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
+  }
+  
+  /* Hide on mobile devices */
+  @media (max-width: 768px) {
+    display: none;
+  }
+  
+  /* Hide on touch devices (phones/tablets) */
+  @media (hover: none) and (pointer: coarse) {
+    display: none;
   }
 `;
 
@@ -187,9 +208,11 @@ function Controls({
   onReset,
   onSolve,
   onRotateFace,
-  cubeState
+  cubeState,
+  onOpenKeybindingModal
 }) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const { isKeyboardDevice } = useDeviceDetection();
 
   const handleReset = () => {
     if (isAnimating || !onReset) return;
@@ -236,6 +259,7 @@ function Controls({
     // console.log(`🔵 Calling onRotateFace: ${face} ${direction}`);
     onRotateFace(face, direction);
   };
+
 
 
 
@@ -325,6 +349,16 @@ function Controls({
           {isAnimating ? 'Solving...' : 'Solve'}
         </ActionButton>
       </ButtonGroup>
+
+      {isKeyboardDevice && (
+        <ButtonGroup>
+          <SettingsButton 
+            onClick={onOpenKeybindingModal}
+          >
+            ⚙️ Customize Keys
+          </SettingsButton>
+        </ButtonGroup>
+      )}
     </ControlsContainer>
   );
 }
