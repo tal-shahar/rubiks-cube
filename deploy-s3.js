@@ -3,10 +3,17 @@ const fs = require('fs');
 const path = require('path');
 const mime = require('mime-types');
 
+// Get version from package.json
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const version = packageJson.version;
+const buildTime = new Date().toISOString();
+
 // Configuration
 const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || 'rubiks-cube-site';
 const AWS_REGION = process.env.AWS_REGION || 'us-east-1';
 const CLOUDFRONT_DISTRIBUTION_ID = process.env.CLOUDFRONT_DISTRIBUTION_ID || '';
+
+console.log(`🚀 Deploying Rubik's Cube v${version} to S3...`);
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -51,19 +58,30 @@ async function uploadFile(filePath, key) {
 // Function to get cache control headers
 function getCacheControl(filePath) {
   const ext = path.extname(filePath).toLowerCase();
+  const fileName = path.basename(filePath);
   
-  // Static assets (JS, CSS, images) - cache for 1 year
-  if (['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(ext)) {
+  // Service worker - no cache to ensure updates
+  if (fileName === 'sw.js') {
+    return 'no-cache, no-store, must-revalidate';
+  }
+  
+  // Static assets with version in filename - cache for 1 year
+  if (['.js', '.css'].includes(ext) && (fileName.includes('main.') || fileName.includes('bundle.'))) {
     return 'public, max-age=31536000, immutable';
   }
   
-  // HTML files - cache for 1 hour
+  // Other static assets - cache for 1 year
+  if (['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot'].includes(ext)) {
+    return 'public, max-age=31536000, immutable';
+  }
+  
+  // HTML files - short cache with version check
   if (ext === '.html') {
-    return 'public, max-age=3600';
+    return 'public, max-age=300, must-revalidate';
   }
   
   // Default - no cache
-  return 'no-cache';
+  return 'no-cache, no-store, must-revalidate';
 }
 
 // Function to get all files in a directory recursively

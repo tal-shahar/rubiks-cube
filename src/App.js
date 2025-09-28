@@ -6,6 +6,7 @@ import InfoPanel from './components/InfoPanel';
 import KeybindingModal from './components/KeybindingModal';
 import { useKeybindings } from './hooks/useKeybindings';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
+import { initializeVersionCheck } from './utils/version';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -65,6 +66,11 @@ function App() {
   const rotateFaceRef = useRef();
   const cameraResetRef = useRef();
   const groupRef = useRef();
+
+  // Initialize version checking and cache management
+  useEffect(() => {
+    initializeVersionCheck();
+  }, []);
 
   // Initialize keybinding system
   const {

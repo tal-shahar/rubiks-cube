@@ -1,6 +1,6 @@
 {
   "name": "rubiks-cube",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Interactive Rubik's Cube using Three.js and React",
   "main": "index.js",
   "scripts": {
