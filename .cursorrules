@@ -1,0 +1,57 @@
+# CURSOR Rules for Production Readiness
+
+## Production Readiness Trigger
+When the user types "get ready for prod", execute the following production readiness workflow:
+
+### 1. Acknowledge CURSOR Rule
+- Confirm this is a CURSOR rule being executed
+- Display the production readiness checklist
+
+### 2. Update Documentation
+- Analyze the current codebase functionality
+- Update README.md with current application features and capabilities
+- Include setup instructions, dependencies, and usage examples
+- Document any recent changes or new features
+
+### 3. Quality Assurance Checks
+- Run linting tools (ESLint, Prettier, etc.) based on project type
+- Execute build/compilation commands to ensure no errors
+- Check for TypeScript errors if applicable
+- Verify all dependencies are properly installed
+- Run any static analysis tools available
+
+### 4. Test Suite Validation
+- Identify and run all available test suites
+- Fix any failing tests by analyzing errors and implementing fixes
+- Ensure test coverage is adequate
+- Update outdated tests to match current functionality
+- Verify all tests pass before proceeding
+
+### 5. Production Preview
+- Start local development server if available
+- Provide browser preview of the application
+- Check for any runtime errors or issues
+- Verify all features work as expected
+- Document any deployment considerations
+
+### 6. Final Report
+- Provide summary of all checks performed
+- List any issues found and resolved
+- Confirm production readiness status
+- **Include preview site link** if local server is running
+- Suggest any additional improvements if needed
+
+## Project-Specific Commands
+- **React/Node.js**: `npm run build`, `npm test`, `npm run lint`, `npm run serve`
+- **Python**: `python -m pytest`, `black .`, `flake8`, `python -m http.server`
+- **Vue.js**: `npm run build`, `npm test`, `npm run serve`
+- **Angular**: `ng build --prod`, `ng test`, `ng serve --prod`
+- **Next.js**: `npm run build`, `npm test`, `npm start`
+- **Svelte**: `npm run build`, `npm test`, `npm run preview`
+- **Other**: Adapt commands based on project structure and package.json/requirements.txt
+
+## Error Handling
+- If any step fails, provide detailed error messages
+- Suggest specific fixes for common issues
+- Continue with remaining steps when possible
+- Always provide clear next steps for resolution
