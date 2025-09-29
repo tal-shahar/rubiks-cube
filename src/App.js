@@ -133,9 +133,9 @@ const CubeCanvas = styled.div`
 
 const CubeContainer = styled.div`
   width: 100%;
-  height: 600px;
+  height: 100%;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border-radius: 8px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   overflow: hidden;
@@ -310,7 +310,7 @@ function App() {
           <CubeWrapper>
             <CubeTitle>Simple Revert Solver</CubeTitle>
             <CubeCanvas>
-              <CubeContainer style={{ width: '300px', height: '300px' }}>
+              <CubeContainer>
                 <RubiksCube 
                   isRotating={isRotating}
                   autoRotate={autoRotate}
@@ -332,7 +332,7 @@ function App() {
           <CubeWrapper>
             <CubeTitle>Advanced Kociemba Solver</CubeTitle>
             <CubeCanvas>
-              <CubeContainer style={{ width: '300px', height: '300px' }}>
+              <CubeContainer>
                 <RubiksCube 
                   isRotating={isRotating}
                   autoRotate={autoRotate}
