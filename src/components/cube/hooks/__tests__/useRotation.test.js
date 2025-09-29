@@ -83,7 +83,7 @@ describe('Rotation Logic', () => {
         // Rotation history should be updated
         mockPieces.slice(0, 3).forEach(piece => {
           expect(piece.rotationHistory).toHaveLength(1);
-          expect(piece.rotationHistory[0].move).toBe('F');
+          expect(piece.rotationHistory[0].face).toBe('F');
           expect(piece.rotationHistory[0].direction).toBe('clockwise');
         });
       });
@@ -318,7 +318,7 @@ describe('Rotation Logic', () => {
         
         expect(mockPieces[0].rotationHistory.length).toBe(initialHistoryLength + 1);
         expect(mockPieces[0].rotationHistory[initialHistoryLength]).toEqual({
-          move: 'F',
+          face: 'F',
           direction: 'clockwise',
           fromPosition: [1, 1, 1],
           toPosition: [-1, 1, 1],
@@ -483,10 +483,10 @@ describe('Rotation Logic', () => {
         expect(testPiece.colors).toEqual({
           front: 'white',  // front stays front
           back: 'yellow',  // back stays back
-          right: 'green',  // bottom -> right
-          left: 'blue',    // top -> left
-          top: 'red',      // right -> top
-          bottom: 'orange' // left -> bottom
+          right: 'red',    // right stays right
+          left: 'orange',  // left stays left
+          top: 'blue',     // top stays top
+          bottom: 'green'  // bottom stays bottom
         });
       });
     });

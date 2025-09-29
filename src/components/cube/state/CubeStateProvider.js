@@ -2,120 +2,129 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { logToTerminal } from '../utils/logger';
 import { getOriginalPosition, getOriginalColors, getStartingPositionColors } from '../utils/colors';
 
-// Pure JavaScript global state manager - NO React dependencies
-const CubeStateManager = {
-  state: null,
-  initialized: false,
-  listeners: [],
-  
-  // Ensure initialization happens only once
-  ensureInitialized() {
-    if (!this.initialized) {
-      // console.log('🚨🚨🚨 CubeStateManager: REINITIALIZING - This should not happen!');
-      // console.trace('🚨 REINITIALIZATION - Stack trace:');
-      this.initialize();
-    }
-  },
-
-  getState() {
-    // Only initialize if we haven't initialized yet (first time only)
-    if (!this.initialized) {
-      console.log('🚨 CubeStateManager: REINITIALIZING! initialized =', this.initialized);
-      this.initialize();
-    } else {
-      // Debug: Check if rotation history is being preserved
-      const hasRotationHistory = this.state.some(piece => piece.rotationHistory && piece.rotationHistory.length > 0);
-      if (hasRotationHistory) {
-        console.log('✅ CubeStateManager: State has rotation history preserved');
-      } else {
-        console.log('⚠️ CubeStateManager: State has NO rotation history');
+// Factory function to create independent state managers for each cube instance
+function createCubeStateManager(cubeId = 'unknown') {
+  return {
+    state: null,
+    initialized: false,
+    listeners: [],
+    cubeId: cubeId,
+    
+    // Ensure initialization happens only once
+    ensureInitialized() {
+      if (!this.initialized) {
+        // console.log('🚨🚨🚨 CubeStateManager: REINITIALIZING - This should not happen!');
+        // console.trace('🚨 REINITIALIZATION - Stack trace:');
+        this.initialize();
       }
-    }
-    return this.state;
-  },
+    },
 
-  setState(newState) {
-    if (typeof newState === 'function') {
-      this.state = newState(this.state);
-    } else {
-      this.state = newState;
-    }
-    
-    // Debug: Check if this looks like a reset to solved state
-    const isSolvedState = this.state.every((piece, index) => {
-      const originalPosition = getOriginalPosition(piece.pieceId);
-      return piece.position[0] === originalPosition[0] && 
-             piece.position[1] === originalPosition[1] && 
-             piece.position[2] === originalPosition[2];
-    });
-    
-    if (isSolvedState) {
-      console.log('⚠️ State update resulted in solved state - this might be a reset!');
-      console.trace('⚠️ Stack trace of state reset:');
-    } else {
-      // console.log('✅ State updated with scrambled positions');
-    }
-
-    // Notify all listeners
-    this.listeners.forEach(listener => listener());
-  },
-
-  subscribe(listener) {
-    this.listeners.push(listener);
-    return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
-    };
-  },
-
-  initialize() {
-    // console.log('🔄 CubeStateManager: Initializing cube state');
-    logToTerminal('🔄 CubeStateManager: Initializing cube state', null, 'INFO');
-
-    const state = [];
-    
-    // Create 26 pieces (3x3x3 minus center)
-    for (let x = -1; x <= 1; x++) {
-      for (let y = -1; y <= 1; y++) {
-        for (let z = -1; z <= 1; z++) {
-          // Skip the center piece
-          if (x === 0 && y === 0 && z === 0) continue;
-          
-          // Get pieceId based on position in solved state
-          const pieceId = state.length;
-          
-          // Get original colors for this piece
-          const colors = getOriginalColors(pieceId);
-          
-          // Debug logging for initial state
-          // console.log(`Initial piece ${pieceId} at [${x}, ${y}, ${z}]:`, colors);
-          // console.log(`getOriginalColors returned:`, JSON.stringify(colors));
-          
-          // Get starting position colors for this piece
-          const startingPositionColors = getStartingPositionColors(pieceId);
-          
-          // Use the original colors directly - they already represent the starting colors
-          state.push({ 
-            position: [x, y, z], 
-            colors: colors, // Use the original colors (starting colors)
-            startingColors: startingPositionColors, // Store the starting position colors for reference
-            rotationHistory: [], // Track all rotations this piece has undergone
-            pieceId: pieceId // Store the pieceId for reference
-          });
+    getState() {
+      // Only initialize if we haven't initialized yet (first time only)
+      if (!this.initialized) {
+        console.log('🚨 CubeStateManager: REINITIALIZING! initialized =', this.initialized);
+        this.initialize();
+      } else {
+        // Debug: Check if rotation history is being preserved
+        const hasRotationHistory = this.state.some(piece => piece.rotationHistory && piece.rotationHistory.length > 0);
+        if (hasRotationHistory) {
+          console.log(`✅ CubeStateManager (${this.cubeId || 'unknown'}): State has rotation history preserved`);
+          // Log which pieces have rotation history
+          const piecesWithHistory = this.state.filter(piece => piece.rotationHistory && piece.rotationHistory.length > 0);
+          console.log(`🔍 Pieces with rotation history:`, piecesWithHistory.map(p => `${p.pieceId}: ${p.rotationHistory.length} moves`));
+        } else {
+          console.log(`⚠️ CubeStateManager (${this.cubeId || 'unknown'}): State has NO rotation history`);
         }
       }
-    }
-    
-    // Log the complete initial cube state as JSON
-    // console.log('🎯 INITIAL CUBE STATE (End of Initial Load):');
-    // console.log(JSON.stringify(state, null, 2));
-    
-    // Also log to terminal (this will show in the terminal where npm start is running)
-    logToTerminal('🎯 INITIAL CUBE STATE (End of Initial Load)', state, 'INFO');
+      return this.state;
+    },
 
-    this.state = state;
-    this.initialized = true;
-  }
-};
+    setState(newState) {
+      if (typeof newState === 'function') {
+        this.state = newState(this.state);
+      } else {
+        this.state = newState;
+      }
+      
+      // Debug: Check if this looks like a reset to solved state
+      const isSolvedState = this.state.every((piece, index) => {
+        const originalPosition = getOriginalPosition(piece.pieceId);
+        return piece.position[0] === originalPosition[0] && 
+               piece.position[1] === originalPosition[1] && 
+               piece.position[2] === originalPosition[2];
+      });
+      
+      if (isSolvedState) {
+        console.log('⚠️ State update resulted in solved state - this might be a reset!');
+        console.trace('⚠️ Stack trace of state reset:');
+      } else {
+        // console.log('✅ State updated with scrambled positions');
+      }
+
+      // Notify all listeners
+      this.listeners.forEach(listener => listener());
+    },
+
+    subscribe(listener) {
+      this.listeners.push(listener);
+      return () => {
+        this.listeners = this.listeners.filter(l => l !== listener);
+      };
+    },
+
+    initialize() {
+      // console.log('🔄 CubeStateManager: Initializing cube state');
+      logToTerminal('🔄 CubeStateManager: Initializing cube state', null, 'INFO');
+
+      const state = [];
+      
+      // Create 26 pieces (3x3x3 minus center)
+      for (let x = -1; x <= 1; x++) {
+        for (let y = -1; y <= 1; y++) {
+          for (let z = -1; z <= 1; z++) {
+            // Skip the center piece
+            if (x === 0 && y === 0 && z === 0) continue;
+            
+            // Get pieceId based on position in solved state
+            const pieceId = state.length;
+            
+            // Get original colors for this piece
+            const colors = getOriginalColors(pieceId);
+            
+            // Debug logging for initial state
+            // console.log(`Initial piece ${pieceId} at [${x}, ${y}, ${z}]:`, colors);
+            // console.log(`getOriginalColors returned:`, JSON.stringify(colors));
+            
+            // Get starting position colors for this piece
+            const startingPositionColors = getStartingPositionColors(pieceId);
+            
+            // Use the original colors directly - they already represent the starting colors
+            state.push({ 
+              position: [x, y, z], 
+              colors: colors, // Use the original colors (starting colors)
+              startingColors: startingPositionColors, // Store the starting position colors for reference
+              rotationHistory: [], // Track all rotations this piece has undergone
+              pieceId: pieceId // Store the pieceId for reference
+            });
+          }
+        }
+      }
+      
+      // Log the complete initial cube state as JSON
+      // console.log('🎯 INITIAL CUBE STATE (End of Initial Load):');
+      // console.log(JSON.stringify(state, null, 2));
+      
+      // Also log to terminal (this will show in the terminal where npm start is running)
+      logToTerminal('🎯 INITIAL CUBE STATE (End of Initial Load)', state, 'INFO');
+
+      this.state = state;
+      this.initialized = true;
+    }
+  };
+}
+
+// Create a default instance for backward compatibility
+const CubeStateManager = createCubeStateManager();
 
 // Make CubeStateManager available globally
 if (typeof window !== 'undefined') {
@@ -123,20 +132,26 @@ if (typeof window !== 'undefined') {
   // console.log('🌐 CubeStateManager exposed globally on window object');
 }
 
-// Simple React component that uses the global state manager
-export function CubeStateProvider({ children, onCubeStateChange }) {
+// Simple React component that uses its own independent state manager
+export function CubeStateProvider({ children, onCubeStateChange, cubeId }) {
   const [forceUpdate, setForceUpdate] = useState(0);
+  
+  // Create an independent state manager for this cube instance
+  const cubeStateManager = useMemo(() => {
+    console.log(`🏗️ Creating new CubeStateManager for cube: ${cubeId || 'unknown'}`);
+    return createCubeStateManager(cubeId);
+  }, [cubeId]);
   
   // Subscribe to state changes
   useEffect(() => {
-    const unsubscribe = CubeStateManager.subscribe(() => {
+    const unsubscribe = cubeStateManager.subscribe(() => {
       setForceUpdate(prev => prev + 1);
     });
     return unsubscribe;
-  }, []);
+  }, [cubeStateManager]);
 
     const cubeState = useMemo(() => {
-      const state = CubeStateManager.getState();
+      const state = cubeStateManager.getState();
       // console.log(`🔍 CubeStateProvider providing state:`, state.slice(0, 3).map(p => `${p.pieceId}: [${p.position.join(', ')}]`));
       
       // Check if this is a solved state
@@ -155,12 +170,12 @@ export function CubeStateProvider({ children, onCubeStateChange }) {
       // }
       
       return state;
-    }, [forceUpdate]);
+    }, [forceUpdate, cubeStateManager]);
 
   // Function to update cube state
   const setCubeState = useCallback((newState) => {
-    CubeStateManager.setState(newState);
-  }, []);
+    cubeStateManager.setState(newState);
+  }, [cubeStateManager]);
 
   const [isAnimating, setIsAnimating] = useState(false);
   const [rotatingFace, setRotatingFace] = useState(null);
@@ -215,7 +230,8 @@ export function CubeStateProvider({ children, onCubeStateChange }) {
     moveHistory,
     setMoveHistory,
     hasRotated,
-    setHasRotated
+    setHasRotated,
+    cubeStateManager
   });
 }
 

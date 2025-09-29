@@ -1,39 +1,29 @@
 // Keybinding utility functions
+import { getKeybindingRotations } from './rotationConfig';
 
-// Default keybindings
-export const DEFAULT_KEYBINDINGS = {
-  'r': { face: 'R', direction: 'clockwise' },
-  'R': { face: 'R', direction: 'counterclockwise' },
-  'l': { face: 'L', direction: 'clockwise' },
-  'L': { face: 'L', direction: 'counterclockwise' },
-  'u': { face: 'U', direction: 'clockwise' },
-  'U': { face: 'U', direction: 'counterclockwise' },
-  'd': { face: 'D', direction: 'clockwise' },
-  'D': { face: 'D', direction: 'counterclockwise' },
-  'f': { face: 'F', direction: 'clockwise' },
-  'F': { face: 'F', direction: 'counterclockwise' },
-  'b': { face: 'B', direction: 'clockwise' },
-  'B': { face: 'B', direction: 'counterclockwise' },
-  'm': { face: 'M', direction: 'clockwise' },
-  'M': { face: 'M', direction: 'counterclockwise' },
-  'e': { face: 'E', direction: 'clockwise' },
-  'E': { face: 'E', direction: 'counterclockwise' },
-  's': { face: 'S', direction: 'clockwise' },
-  'S': { face: 'S', direction: 'counterclockwise' },
+// Generate default keybindings based on enabled rotations
+const generateDefaultKeybindings = () => {
+  const keybindings = {};
+  const enabledRotations = getKeybindingRotations();
+  
+  enabledRotations.forEach(({ face }) => {
+    // Lowercase for clockwise, uppercase for counterclockwise
+    keybindings[face.toLowerCase()] = { face, direction: 'clockwise' };
+    keybindings[face.toUpperCase()] = { face, direction: 'counterclockwise' };
+  });
+  
+  return keybindings;
 };
 
-// Available faces for keybinding
-export const AVAILABLE_FACES = [
-  { id: 'R', name: 'Right', color: '#DC143C' },
-  { id: 'L', name: 'Left', color: '#FF8C00' },
-  { id: 'U', name: 'Up', color: '#0000FF' },
-  { id: 'D', name: 'Down', color: '#00FF00' },
-  { id: 'F', name: 'Front', color: '#FFFFFF' },
-  { id: 'B', name: 'Back', color: '#FFD700' },
-  { id: 'M', name: 'Middle', color: '#800080' },
-  { id: 'E', name: 'Equatorial', color: '#FF69B4' },
-  { id: 'S', name: 'Standing', color: '#00CED1' },
-];
+// Default keybindings (dynamically generated based on enabled rotations)
+export const DEFAULT_KEYBINDINGS = generateDefaultKeybindings();
+
+// Available faces for keybinding (dynamically generated based on enabled rotations)
+export const AVAILABLE_FACES = getKeybindingRotations().map(({ face, name, color }) => ({
+  id: face,
+  name,
+  color
+}));
 
 export const DIRECTIONS = [
   { id: 'clockwise', name: 'Clockwise' },

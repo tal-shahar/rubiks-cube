@@ -2,9 +2,6 @@ import { useCallback, useState } from 'react';
 import { logRotationStep, logToTerminal } from '../utils/logger';
 import { getOriginalColors } from '../utils/colors';
 
-// Access CubeStateManager from window object (set by CubeStateProvider)
-const CubeStateManager = window.CubeStateManager;
-
 // Helper function to apply 3D position transformation
 function applyPositionTransformation(position, face, direction) {
   const [x, y, z] = position;
@@ -250,21 +247,9 @@ function applyColorRotation(colors, face, direction) {
       }
       break;
     case 'S': // Standing layer rotation (between F and B faces, Z=0 plane)
-      if (direction === 'clockwise') {
-        // Colors rotate clockwise: top->right, right->bottom, bottom->left, left->top (same as F)
-        const temp = rotatedColors.top;
-        rotatedColors.top = rotatedColors.right;
-        rotatedColors.right = rotatedColors.bottom;
-        rotatedColors.bottom = rotatedColors.left;
-        rotatedColors.left = temp;
-      } else if (direction === 'counterclockwise') {
-        // Colors rotate counterclockwise: top->left, left->bottom, bottom->right, right->top (same as F)
-        const temp = rotatedColors.top;
-        rotatedColors.top = rotatedColors.left;
-        rotatedColors.left = rotatedColors.bottom;
-        rotatedColors.bottom = rotatedColors.right;
-        rotatedColors.right = temp;
-      }
+      // S layer pieces should NOT rotate their colors - they just move to new positions
+      // The colors should remain the same relative to the cube faces
+      // This is different from face rotations where pieces rotate around themselves
       break;
   }
   
@@ -278,17 +263,27 @@ function applyColorRotation(colors, face, direction) {
 
 // Consolidated rotation logic
 export const applyRotation = (pieces, face, direction) => {
-  // console.log(`🔄 Applying ${face} ${direction} rotation`);
+  console.log(`🔄 Applying ${face} ${direction} rotation to ${pieces.length} pieces`);
   
-  // Debug: Log the incoming pieces to see if they have rotation history (only for R rotation)
-  if (face === 'R') {
-    console.log('🔍 R rotation - applyRotation called with', pieces.length, 'pieces');
-    const piece25 = pieces.find(p => p.pieceId === 25);
-    if (piece25) {
-      console.log('🔍 Piece 25 incoming rotationHistory:', piece25.rotationHistory);
-      console.log('🔍 Piece 25 incoming colors:', piece25.colors);
-    }
-  }
+  // Debug: Log pieces that will be affected by this rotation - DISABLED
+  // if (face === 'S') {
+  //   console.log('🔍 S rotation - applyRotation called with', pieces.length, 'pieces');
+  //   const affectedPieces = pieces.filter(piece => {
+  //     const [x, y, z] = piece.position;
+  //     return z === 0; // S layer pieces
+  //   });
+  //   console.log('🔍 S layer pieces found:', affectedPieces.length);
+  //   affectedPieces.forEach(piece => {
+  //     console.log(`🔍 Piece ${piece.pieceId} at [${piece.position.join(', ')}] colors:`, piece.colors);
+  //   });
+  //   
+  //   // Also log ALL pieces to see what's being passed in
+  //   console.log('🔍 ALL pieces being processed:');
+  //   pieces.forEach(piece => {
+  //     const [x, y, z] = piece.position;
+  //     console.log(`🔍 Piece ${piece.pieceId} at [${x}, ${y}, ${z}] - S layer? ${z === 0}`);
+  //   });
+  // }
   
   // Filter pieces that are part of the rotating face
   const rotatingPieces = pieces.filter(piece => {
@@ -332,82 +327,27 @@ export const applyRotation = (pieces, face, direction) => {
     // Debug: Log all pieces being processed
     console.log(`🎨 Processing piece ${piece.pieceId} for ${face} ${direction} rotation at position [${piece.position.join(', ')}]`);
     
+    
     // Apply 3D transformation based on face (only current rotation)
     const [x, y, z] = piece.position;
     const [newX, newY, newZ] = applyPositionTransformation(piece.position, face, direction);
     
     // console.log(`🔄 Piece ${piece.pieceId} moving from [${x}, ${y}, ${z}] to [${newX}, ${newY}, ${newZ}]`);
     
-    // Rotate the colors to match the new orientation
-    // When a piece rotates, its colors need to be rotated too
-    // Start with the original solved colors and apply ALL rotations from history
-    const originalColors = getOriginalColors(piece.pieceId);
-    let rotatedColors = { ...originalColors };
-    
-    // Apply all previous rotations to get to the current color state
-    for (const rotation of piece.rotationHistory || []) {
-      rotatedColors = applyColorRotation(rotatedColors, rotation.move, rotation.direction);
-    }
-    
-    // Now apply the current rotation
+    // Handle color rotation based on face type
+    // Start with the CURRENT colors of the piece (not original colors)
+    let rotatedColors = { ...piece.colors };
     rotatedColors = applyColorRotation(rotatedColors, face, direction);
+    
     
     // Color rotation is now handled by the helper function above
     
     // Debug: Log the color rotation for piece 25 (top-right-front corner, more visible)
     if (piece.pieceId === 25 && (face === 'R' || face === 'B')) {
-      // Clear console at start of rotation for clean logs
-      if (piece.rotationHistory.length === 0) {
-        console.clear();
-        console.log('🧹 Console cleared for rotation test');
-      }
-      
       console.log(`🎨 Piece 25 ${face} rotation: ${face} ${direction}`);
-      console.log(`🎨 Original solved colors:`, originalColors);
-      console.log(`🎨 Rotation history:`, piece.rotationHistory || []);
       console.log(`🎨 Current piece colors (before this rotation):`, piece.colors);
-      
-      // Debug: Check if rotationHistory is undefined or null
-      if (!piece.rotationHistory) {
-        console.log('🚨 PROBLEM: piece.rotationHistory is undefined or null!');
-      } else if (piece.rotationHistory.length === 0) {
-        console.log('✅ FIRST ROTATION: No previous rotations');
-      } else {
-        console.log('⚠️ COMPOUND ROTATION: Has', piece.rotationHistory.length, 'previous rotations');
-      }
-      
-      // Debug: Show step-by-step color application
-      let stepColors = { ...originalColors };
-      console.log(`🎨 Step 1 - Starting with original colors:`, stepColors);
-      
-      for (let i = 0; i < (piece.rotationHistory || []).length; i++) {
-        const rotation = piece.rotationHistory[i];
-        stepColors = applyColorRotation(stepColors, rotation.move, rotation.direction);
-        console.log(`🎨 Step ${i + 2} - After ${rotation.move} ${rotation.direction}:`, stepColors);
-      }
-      
-      // Show the current rotation being applied
-      const currentRotationResult = applyColorRotation(stepColors, face, direction);
-      console.log(`🎨 Step ${(piece.rotationHistory || []).length + 2} - After current ${face} ${direction}:`, currentRotationResult);
-      
       console.log(`🎨 Final rotated colors (after all rotations):`, rotatedColors);
       console.log(`🎨 Position change: [${x}, ${y}, ${z}] → [${newX}, ${newY}, ${newZ}]`);
-      
-      // Debug: Show what colors should be visible on each face
-      console.log(`🎨 Colors that should be visible on each face:`);
-      console.log(`🎨   Top face (y=1): ${rotatedColors.top}`);
-      console.log(`🎨   Bottom face (y=-1): ${rotatedColors.bottom}`);
-      console.log(`🎨   Front face (z=1): ${rotatedColors.front}`);
-      console.log(`🎨   Back face (z=-1): ${rotatedColors.back}`);
-      console.log(`🎨   Right face (x=1): ${rotatedColors.right}`);
-      console.log(`🎨   Left face (x=-1): ${rotatedColors.left}`);
-      
-      // Special debug for B then R sequence
-      if (piece.rotationHistory.length === 1 && piece.rotationHistory[0].move === 'B' && face === 'R') {
-        console.log('🔍 SPECIAL DEBUG: B then R sequence detected!');
-        console.log('🔍 After B rotation, colors should be:', piece.colors);
-        console.log('🔍 Now applying R rotation to those colors...');
-      }
     }
     
     // Update position and colors
@@ -416,7 +356,7 @@ export const applyRotation = (pieces, face, direction) => {
     
     // Add to rotation history
     piece.rotationHistory.push({
-      move: face,
+      face: face,
       direction: direction,
       fromPosition: [x, y, z],
       toPosition: [newX, newY, newZ],
@@ -435,7 +375,7 @@ export const applyRotation = (pieces, face, direction) => {
 };
 
 // Custom hook for rotation functionality
-export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated) {
+export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated, cubeStateManager) {
 
   // Function to rotate a face with smooth 3D animation
   const rotateFaceWithAnimation = useCallback((face, direction, onComplete) => {
@@ -522,7 +462,7 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
         
         // console.log('🎯 ROTATION COMPLETED - State should be updated');
         // Get current state to verify rotation was applied
-        const currentState = CubeStateManager.getState();
+        const currentState = cubeStateManager.getState();
         // console.log('🎯 Pieces that moved:', currentState.filter(p => {
         //   const originalPos = [-1, -1, -1]; // Default original position for piece 0
         //   return p.position[0] !== originalPos[0] || p.position[1] !== originalPos[1] || p.position[2] !== originalPos[2];
@@ -530,7 +470,7 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
         
         // Check if state gets reset after a short delay
         setTimeout(() => {
-          const delayedState = CubeStateManager.getState();
+          const delayedState = cubeStateManager.getState();
           const stillScrambled = delayedState.some(p => {
             const originalPos = [-1, -1, -1]; // Default original position for piece 0
             return p.position[0] !== originalPos[0] || p.position[1] !== originalPos[1] || p.position[2] !== originalPos[2];
@@ -554,12 +494,92 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
     requestAnimationFrame(animate);
   }, [setCubeState, setIsAnimating, setHasRotated]);
 
-  // Function to execute moves with realistic face rotation animations
+  // Execute a single move with smooth animation but without changing global animation state
+  const executeSingleMove = useCallback((face, direction, onComplete, duration = 300) => {
+    // Set local animation state for this move
+    setRotatingFace({ face, direction });
+    setRotationProgress(0);
+    
+    const startTime = Date.now();
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+        // Use easing function for smooth animation - faster acceleration
+        const easedProgress = 1 - Math.pow(1 - progress, 2); // Quadratic ease-out (snappier)
+      
+      setRotationProgress(easedProgress);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        // Animation complete - apply the final state
+        const currentState = cubeStateManager.getState();
+        
+        // Find pieces that belong to the rotating face
+        const piecesToRotate = currentState.filter(piece => {
+          const [x, y, z] = piece.position;
+          
+          switch (face) {
+            case 'F': return z === 1;
+            case 'B': return z === -1;
+            case 'R': return x === 1;
+            case 'L': return x === -1;
+            case 'U': return y === 1;
+            case 'D': return y === -1;
+            case 'M': return x === 0;
+            case 'E': return y === 0;
+            case 'S': return z === 0;
+            default: return false;
+          }
+        });
+
+        // Apply rotation to the pieces
+        const rotatedPieces = piecesToRotate.map(piece => {
+          const newPosition = applyPositionTransformation(piece.position, face, direction);
+          const newColors = applyColorRotation(piece.colors, face, direction);
+          
+          return {
+            ...piece,
+            position: newPosition,
+            colors: newColors,
+            rotationHistory: [...(piece.rotationHistory || []), { face, direction, timestamp: Date.now() }]
+          };
+        });
+
+        // Update the state with rotated pieces
+        const newState = currentState.map(piece => {
+          const rotatedPiece = rotatedPieces.find(p => p.pieceId === piece.pieceId);
+          return rotatedPiece || piece;
+        });
+
+        // Apply the new state
+        cubeStateManager.setState(newState);
+        
+        // Reset animation state
+        setRotatingFace(null);
+        setRotationProgress(0);
+        
+        // Call completion callback
+        if (onComplete) onComplete();
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [setRotatingFace, setRotationProgress]);
+
+  // Function to execute moves with realistic face rotation animations (moved after executeSingleMove)
   const executeMovesWithAnimation = useCallback((moves, onComplete) => {
     let currentMoveIndex = 0;
     
+    // Set animation state at the start of the sequence
+    setIsAnimating(true);
+    
     const executeNextMove = () => {
       if (currentMoveIndex >= moves.length) {
+        // Only set animation to false when the entire sequence is complete
+        setIsAnimating(false);
         if (onComplete) onComplete();
         return;
       }
@@ -567,16 +587,72 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
       const move = moves[currentMoveIndex];
       // console.log(`🔄 Executing move ${currentMoveIndex + 1}/${moves.length}: ${move.face} ${move.direction}`);
       
-      // Execute the move with realistic face rotation
-      rotateFaceWithAnimation(move.face, move.direction, () => {
+      // Execute the move without changing the global animation state
+      executeSingleMove(move.face, move.direction, () => {
         currentMoveIndex++;
-        // Small delay between moves for visual clarity
-        setTimeout(executeNextMove, 25);
+        // Delay between moves for visual clarity (100ms pause between moves)
+        setTimeout(executeNextMove, 100);
       });
     };
     
     executeNextMove();
-  }, [rotateFaceWithAnimation]);
+  }, [setIsAnimating, executeSingleMove]);
+
+  // Execute scramble moves with fast animation (300ms per move)
+  const executeScrambleWithAnimation = useCallback((moves, onComplete) => {
+    let currentMoveIndex = 0;
+    
+    // Set animation state at the start of the sequence
+    setIsAnimating(true);
+    
+    const executeNextMove = () => {
+      if (currentMoveIndex >= moves.length) {
+        // Only set animation to false when the entire sequence is complete
+        setIsAnimating(false);
+        if (onComplete) onComplete();
+        return;
+      }
+      
+      const move = moves[currentMoveIndex];
+      
+      // Execute the move with fast animation (300ms per move)
+      executeSingleMove(move.face, move.direction, () => {
+        currentMoveIndex++;
+        // Short delay between moves for scramble (50ms)
+        setTimeout(executeNextMove, 50);
+      }, 300); // 300ms duration for scramble
+    };
+    
+    executeNextMove();
+  }, [setIsAnimating, executeSingleMove]);
+
+  // Execute solve moves with slower animation (55 FPS = ~450ms per move)
+  const executeSolveWithAnimation = useCallback((moves, onComplete) => {
+    let currentMoveIndex = 0;
+    
+    // Set animation state at the start of the sequence
+    setIsAnimating(true);
+    
+    const executeNextMove = () => {
+      if (currentMoveIndex >= moves.length) {
+        // Only set animation to false when the entire sequence is complete
+        setIsAnimating(false);
+        if (onComplete) onComplete();
+        return;
+      }
+      
+      const move = moves[currentMoveIndex];
+      
+      // Execute the move with slower animation (450ms per move for 55 FPS)
+      executeSingleMove(move.face, move.direction, () => {
+        currentMoveIndex++;
+        // Longer delay between moves for solve (100ms)
+        setTimeout(executeNextMove, 100);
+      }, 450); // 450ms duration for solve (55 FPS)
+    };
+    
+    executeNextMove();
+  }, [setIsAnimating, executeSingleMove]);
 
   // Rotate a face of the cube with smooth animation
   const rotateFace = useCallback((face, direction) => {
@@ -602,6 +678,9 @@ export function useRotation(setCubeState, setIsAnimating, setRotatingFace, setRo
     rotateFace,
     rotateFaceWithAnimation,
     executeMovesWithAnimation,
+    executeScrambleWithAnimation,
+    executeSolveWithAnimation,
+    executeSingleMove,
     applyRotation
   };
 }

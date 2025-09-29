@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { CubeStateProvider } from './state/CubeStateProvider';
 import { CubeGroup } from './components/CubeGroup';
 import { useRotation } from './hooks/useRotation';
 import { getOriginalColors, getStartingPositionColors } from './utils/colors';
+import { getScrambleRotations } from '../../utils/rotationConfig';
+import { advancedSolver } from '../../utils/advancedSolver';
 
 // Camera reset component
 const CameraReset = ({ onCameraReset }) => {
@@ -47,7 +49,21 @@ const CameraReset = ({ onCameraReset }) => {
 };
 
 // Main Rubik's Cube component
-export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset, onSolve, onRotateFace, onCubeStateChange, onResetRef, onGroupRef, onCameraReset }) {
+export function RubiksCube({ 
+  isRotating, 
+  autoRotate = false, 
+  onScramble, 
+  onReset, 
+  onSolveRef,
+  onRotateFace, 
+  onCubeStateChange, 
+  onResetRef, 
+  onGroupRef, 
+  onCameraReset, 
+  onAnimationStateChange,
+  cubeId,
+  onMoveHistoryChange 
+}) {
   return (
     <Canvas
       camera={{ position: [5, 5, 5], fov: 50 }}
@@ -57,37 +73,60 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
       <directionalLight position={[10, 10, 5]} intensity={1} />
       <pointLight position={[-10, -10, -5]} intensity={0.5} />
       
-      <CubeStateProvider onCubeStateChange={onCubeStateChange}>
-        {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated }) => {
-          const rotationHook = useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated);
+      <CubeStateProvider onCubeStateChange={onCubeStateChange} cubeId={cubeId}>
+        {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated, cubeStateManager }) => {
+          const rotationHook = useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated, cubeStateManager);
+          
+          // Notify parent component when animation state changes
+          useEffect(() => {
+            if (onAnimationStateChange) {
+              onAnimationStateChange(isAnimating);
+            }
+          }, [isAnimating, onAnimationStateChange]);
           
           // Create enhanced functions that use the rotation hook
-          const enhancedRotateFace = (face, direction) => {
+          const enhancedRotateFace = useCallback((face, direction) => {
             if (isAnimating) {
               console.log(`⚠️ enhancedRotateFace: Already animating, skipping ${face} ${direction}`);
               return;
             }
             rotationHook.rotateFace(face, direction);
-          };
+          }, [isAnimating]);
           
-          const enhancedRotateFaceWithAnimation = (face, direction, onComplete) => {
+          const enhancedRotateFaceWithAnimation = useCallback((face, direction, onComplete) => {
             if (isAnimating) {
               console.log(`⚠️ enhancedRotateFaceWithAnimation: Already animating, skipping ${face} ${direction}`);
               return;
             }
             rotationHook.rotateFaceWithAnimation(face, direction, onComplete);
-          };
+          }, [isAnimating]);
           
-          const enhancedExecuteMovesWithAnimation = (moves, onComplete) => {
+          const enhancedExecuteMovesWithAnimation = useCallback((moves, onComplete) => {
             if (isAnimating) {
               console.log(`⚠️ enhancedExecuteMovesWithAnimation: Already animating, skipping moves`);
               return;
             }
             rotationHook.executeMovesWithAnimation(moves, onComplete);
-          };
+          }, [isAnimating]);
+
+          const enhancedExecuteScrambleWithAnimation = useCallback((moves, onComplete) => {
+            if (isAnimating) {
+              console.log(`⚠️ enhancedExecuteScrambleWithAnimation: Already animating, skipping moves`);
+              return;
+            }
+            rotationHook.executeScrambleWithAnimation(moves, onComplete);
+          }, [isAnimating]);
+
+          const enhancedExecuteSolveWithAnimation = useCallback((moves, onComplete) => {
+            if (isAnimating) {
+              console.log(`⚠️ enhancedExecuteSolveWithAnimation: Already animating, skipping moves`);
+              return;
+            }
+            rotationHook.executeSolveWithAnimation(moves, onComplete);
+          }, [isAnimating]);
 
           // Scramble the cube with realistic face rotations
-          const scramble = () => {
+          const scramble = useCallback(() => {
             if (isAnimating) return;
             
             setHasRotated(true); // Mark that rotations have occurred
@@ -96,23 +135,47 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
             // DON'T clear move history - keep all previous moves (manual + scramble)
             console.log(`🎲 SCRAMBLING CUBE - Current move history: ${moveHistory.length} moves`);
             
-            const moves = ['F', 'B', 'R', 'L', 'U', 'D', 'M', 'E', 'S'];
+            const moves = getScrambleRotations();
             const directions = ['clockwise', 'counterclockwise'];
             const scrambleSequence = [];
             
-            // Generate 20 random moves
+            // Use a shared seed for consistent scramble across both cubes
+            // This ensures both cubes get the same sequence but generate it independently
+            const sharedSeed = Math.floor(Date.now() / 1000); // Use seconds for shared timing
+            let seed = sharedSeed;
+            
+            // Simple seeded random number generator
+            const seededRandom = () => {
+              seed = (seed * 9301 + 49297) % 233280;
+              return seed / 233280;
+            };
+            
+            // Generate 20 random moves using the seeded generator
             for (let i = 0; i < 20; i++) {
-              const move = moves[Math.floor(Math.random() * moves.length)];
-              const direction = directions[Math.floor(Math.random() * directions.length)];
+              const move = moves[Math.floor(seededRandom() * moves.length)];
+              const direction = directions[Math.floor(seededRandom() * directions.length)];
               scrambleSequence.push({ face: move, direction });
             }
             
             console.log('🎲 SCRAMBLING CUBE with sequence:', scrambleSequence.map(m => `${m.face} ${m.direction}`));
             
-            // Execute scramble moves with realistic animations
-            enhancedExecuteMovesWithAnimation(scrambleSequence, () => {
+            // Execute scramble moves with fast animations
+            enhancedExecuteScrambleWithAnimation(scrambleSequence, () => {
               setIsAnimating(false);
               console.log('✅ CUBE SCRAMBLED!');
+              
+              // Update move history with scramble moves
+              setMoveHistory(prevHistory => {
+                const newHistory = [...prevHistory, ...scrambleSequence];
+                console.log(`📝 Updated move history: ${newHistory.length} total moves`);
+                
+                // Notify parent component of move history change
+                if (onMoveHistoryChange) {
+                  onMoveHistoryChange(newHistory);
+                }
+                
+                return newHistory;
+              });
               
               // Log final state
               setCubeState(currentState => {
@@ -121,13 +184,18 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
                 return currentState;
               });
             });
-          };
+          }, [isAnimating, setHasRotated, setIsAnimating, enhancedExecuteScrambleWithAnimation, setMoveHistory, onMoveHistoryChange, setCubeState]);
 
           // Reset the cube to solved state
-          const reset = () => {
+          const reset = useCallback(() => {
             // Clear move history when resetting
             setMoveHistory([]);
             setHasRotated(false); // Reset the rotation flag since we're going back to original state
+            
+            // Notify parent component of cleared move history
+            if (onMoveHistoryChange) {
+              onMoveHistoryChange([]);
+            }
             
             setCubeState(() => {
               const state = [];
@@ -165,7 +233,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               
               return state;
             });
-          };
+          }, [setMoveHistory, setHasRotated, onMoveHistoryChange, setCubeState]);
 
           // Expose reset function to parent component
           useEffect(() => {
@@ -173,6 +241,7 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               onResetRef.current = reset;
             }
           }, [onResetRef, reset]);
+
 
           // Generate optimal solve sequence using beginner's method
           const generateOptimalSolve = (moveHistory) => {
@@ -197,32 +266,134 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
           };
 
           // Solve the cube by reversing all moves
-          const solve = () => {
+          const solve = useCallback((customSequence = null) => {
             if (isAnimating) return;
             
-            console.log('🧩 SOLVING CUBE...');
-            console.log(`🎯 SOLVING CUBE: Reversing ${moveHistory.length} moves`);
-            console.log('📋 Move history:', moveHistory.map(m => `${m.face} ${m.direction}`));
-            
-            // Generate solve sequence from move history
-            const solveSequence = generateOptimalSolve(moveHistory);
-            
-            if (solveSequence.length === 0) {
-              console.log('⚠️ No moves to reverse - cube might already be solved or no moves were recorded');
+            // If custom sequence is provided (for simple revert solver), use it
+            if (customSequence && customSequence.length > 0) {
+              console.log(`🔄 SIMPLE REVERT SOLVER: Using provided sequence with ${customSequence.length} moves`);
+              console.log('🔄 Sequence:', customSequence.map(m => `${m.face} ${m.direction}`));
+              
+              // Execute moves with slower solve animations (55 FPS)
+              enhancedExecuteSolveWithAnimation(customSequence, () => {
+                // Clear move history after solving
+                setMoveHistory([]);
+                setIsAnimating(false);
+                console.log('✅ CUBE SOLVED WITH SIMPLE REVERT METHOD!');
+                
+                // Notify parent component of cleared move history
+                if (onMoveHistoryChange) {
+                  onMoveHistoryChange([]);
+                }
+              });
               return;
             }
             
-            console.log('🔄 Reversed sequence:', solveSequence.map(m => `${m.face} ${m.direction}`));
-            console.log(`🚀 Starting solve with ${solveSequence.length} moves...`);
+            // Check if this is the left cube (simple revert solver) or right cube (advanced solver)
+            const isLeftCube = cubeId === 'left';
             
-            // Execute moves with realistic face rotations
-            enhancedExecuteMovesWithAnimation(solveSequence, () => {
-              // Clear move history after solving
-              setMoveHistory([]);
-              setIsAnimating(false);
-              console.log('✅ CUBE SOLVED!');
-            });
-          };
+            if (isLeftCube) {
+              console.log('🔄 LEFT CUBE: Using simple revert solver (no custom sequence provided)');
+              
+              // For left cube without custom sequence, use move history
+              if (moveHistory.length === 0) {
+                console.log('⚠️ Left cube: No moves to reverse - cube might already be solved');
+                return;
+              }
+              
+              const solveSequence = generateOptimalSolve(moveHistory);
+              
+              if (solveSequence.length === 0) {
+                console.log('⚠️ Left cube: No moves to reverse - cube might already be solved');
+                return;
+              }
+              
+              console.log(`🎯 LEFT CUBE SIMPLE SOLVE: Reversing ${moveHistory.length} moves`);
+              console.log('🔄 Left cube sequence:', solveSequence.map(m => `${m.face} ${m.direction}`));
+              
+              enhancedExecuteSolveWithAnimation(solveSequence, () => {
+                setMoveHistory([]);
+                setIsAnimating(false);
+                console.log('✅ LEFT CUBE SOLVED WITH SIMPLE METHOD!');
+                
+                // Notify parent component of cleared move history
+                if (onMoveHistoryChange) {
+                  onMoveHistoryChange([]);
+                }
+              });
+              return;
+            }
+            
+            console.log('🧩 RIGHT CUBE ADVANCED SOLVER: Starting solve...');
+            
+            // Use advanced solver to analyze and solve the cube
+            const solverResult = advancedSolver.solve(cubeState);
+            
+            if (solverResult.success) {
+              console.log(`✅ Advanced solver found solution: ${solverResult.moves} moves using ${solverResult.method}`);
+              console.log('📝 Solution:', solverResult.solution);
+              
+              if (solverResult.solution.length === 0) {
+                console.log('🎯 Cube is already solved!');
+                return;
+              }
+              
+              // Convert solution to move sequence format
+              const solveSequence = solverResult.solution.map(move => {
+                const face = move[0];
+                const direction = move.endsWith("'") ? 'counterclockwise' : move.endsWith('2') ? 'double' : 'clockwise';
+                return { face, direction };
+              });
+              
+              console.log('🔄 Converted sequence:', solveSequence.map(m => `${m.face} ${m.direction}`));
+              console.log(`🚀 Starting advanced solve with ${solveSequence.length} moves...`);
+              
+              // Execute moves with slower solve animations (55 FPS)
+              enhancedExecuteSolveWithAnimation(solveSequence, () => {
+                // Clear move history after solving
+                setMoveHistory([]);
+                setIsAnimating(false);
+                console.log('✅ RIGHT CUBE SOLVED WITH ADVANCED ALGORITHM!');
+                
+                // Notify parent component of cleared move history
+                if (onMoveHistoryChange) {
+                  onMoveHistoryChange([]);
+                }
+              });
+              
+            } else {
+              console.log('❌ Advanced solver failed:', solverResult.error || 'Unknown error');
+              console.log('🔄 Falling back to simple reverse method...');
+              
+              // Fallback to simple reverse method
+              console.log(`🎯 SIMPLE SOLVE: Reversing ${moveHistory.length} moves`);
+              const solveSequence = generateOptimalSolve(moveHistory);
+              
+              if (solveSequence.length === 0) {
+                console.log('⚠️ No moves to reverse - cube might already be solved');
+                return;
+              }
+              
+              enhancedExecuteSolveWithAnimation(solveSequence, () => {
+                setMoveHistory([]);
+                setIsAnimating(false);
+                console.log('✅ CUBE SOLVED WITH SIMPLE METHOD!');
+                
+                // Notify parent component of cleared move history
+                if (onMoveHistoryChange) {
+                  onMoveHistoryChange([]);
+                }
+              });
+            }
+
+          }, [isAnimating, cubeId, onMoveHistoryChange, setMoveHistory, setIsAnimating]);
+
+          // Expose solve function to parent component
+          useEffect(() => {
+            if (onSolveRef) {
+              onSolveRef.current = solve;
+            }
+          }, [onSolveRef, solve]);
 
           return (
             <CubeGroup
@@ -239,10 +410,10 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
               autoRotate={autoRotate}
               onScramble={onScramble}
               onReset={onReset}
-              onSolve={onSolve}
               onRotateFace={onRotateFace}
               onCubeStateChange={onCubeStateChange}
               onGroupRef={onGroupRef}
+              cubeId={cubeId}
             />
           );
         }}
@@ -259,7 +430,9 @@ export function RubiksCube({ isRotating, autoRotate = false, onScramble, onReset
         }}
         enablePan={true} 
         enableZoom={true} 
-        enableRotate={isRotating} 
+        enableRotate={isRotating}
+        autoRotate={false}
+        autoRotateSpeed={2.0}
       />
       <Environment preset="sunset" />
     </Canvas>

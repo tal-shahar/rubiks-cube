@@ -9,12 +9,14 @@
     "test": "craco test",
     "eject": "react-scripts eject",
     "deploy": "node deploy.js",
+    "deploy:prod": "node deploy-production.js",
     "deploy:s3": "node deploy-s3.js",
     "serve": "npx serve -s build",
     "log-server": "node log-server.js",
     "monitor-logs": "node monitor-logs.js",
     "dev": "concurrently \"npm run log-server\" \"npm start\"",
-    "invalidate-cache": "node invalidate-cloudfront.js"
+    "invalidate-cache": "node invalidate-cloudfront.js",
+    "predeploy": "npm test && npm run build"
   },
   "dependencies": {
     "@react-three/drei": "^9.88.13",
@@ -51,6 +53,7 @@
     "jest-environment-jsdom": "^30.1.2",
     "mime-types": "^2.1.35",
     "postcss": "^8.5.6",
+    "terser-webpack-plugin": "^5.3.14",
     "webpack-dev-server": "^5.2.2"
   },
   "overrides": {

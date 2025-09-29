@@ -162,9 +162,9 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
       {/* Solid cube base */}
       <mesh geometry={cubeGeometry}>
         <meshPhongMaterial 
-          color={isPartOfRotatingFace() ? "#666666" : "#333333"}
-          emissive={isPartOfRotatingFace() ? "#444444" : "#000000"}
-          emissiveIntensity={isPartOfRotatingFace() ? 0.3 : 0}
+          color="#333333"
+          emissive="#000000"
+          emissiveIntensity={0}
         />
       </mesh>
       
@@ -229,8 +229,8 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
             <meshPhongMaterial 
               color={displayColor} 
               side={THREE.FrontSide}
-              emissive={isPartOfRotatingFace() ? displayColor : "#000000"}
-              emissiveIntensity={isPartOfRotatingFace() ? 0.5 : 0.1}
+              emissive="#000000"
+              emissiveIntensity={0.1}
             />
           </mesh>
         );

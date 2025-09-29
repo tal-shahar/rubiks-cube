@@ -31,6 +31,71 @@ export function getOriginalColors(pieceId) {
   const originalPosition = positions[pieceId];
   const [x, y, z] = originalPosition;
   
+  // Handle S layer pieces (z=0) FIRST - middle layer between front and back
+  if (z === 0) {
+    // S layer pieces need UNIQUE colors based on their position
+    // Each S layer piece should have different colors to make rotations work correctly
+    let colors = {
+      front: 'white',      // Front face color
+      back: 'yellow',      // Back face color  
+      right: 'red',        // Right face color
+      left: 'orange',      // Left face color
+      top: 'blue',         // Top face color
+      bottom: 'green'      // Bottom face color
+    };
+    
+    // Make S layer pieces have UNIQUE colors based on their position
+    // Use ONLY standard Rubik's Cube colors: white, yellow, red, orange, blue, green
+    if (x === -1) {
+      colors.left = 'orange';
+      // For left side pieces, make other colors different using standard colors
+      if (y === -1) {
+        colors.bottom = 'green';
+        colors.right = 'red';     // Standard color for uniqueness
+        colors.top = 'blue';      // Standard color for uniqueness
+      } else if (y === 0) {
+        colors.right = 'red';     // Standard color for uniqueness
+        colors.top = 'blue';      // Standard color for uniqueness
+        colors.bottom = 'green';  // Standard color for uniqueness
+      } else if (y === 1) {
+        colors.top = 'blue';
+        colors.right = 'red';     // Standard color for uniqueness
+        colors.bottom = 'green';  // Standard color for uniqueness
+      }
+    } else if (x === 0) {
+      // For center pieces, make colors unique based on y position using standard colors
+      if (y === -1) {
+        colors.bottom = 'green';
+        colors.left = 'orange';   // Standard color for uniqueness
+        colors.right = 'red';     // Standard color for uniqueness
+        colors.top = 'blue';      // Standard color for uniqueness
+      } else if (y === 1) {
+        colors.top = 'blue';
+        colors.left = 'orange';   // Standard color for uniqueness
+        colors.right = 'red';     // Standard color for uniqueness
+        colors.bottom = 'green';  // Standard color for uniqueness
+      }
+    } else if (x === 1) {
+      colors.right = 'red';
+      // For right side pieces, make other colors different using standard colors
+      if (y === -1) {
+        colors.bottom = 'green';
+        colors.left = 'orange';   // Standard color for uniqueness
+        colors.top = 'blue';      // Standard color for uniqueness
+      } else if (y === 0) {
+        colors.left = 'orange';   // Standard color for uniqueness
+        colors.top = 'blue';      // Standard color for uniqueness
+        colors.bottom = 'green';  // Standard color for uniqueness
+      } else if (y === 1) {
+        colors.top = 'blue';
+        colors.left = 'orange';   // Standard color for uniqueness
+        colors.bottom = 'green';  // Standard color for uniqueness
+      }
+    }
+    
+    return colors; // Return early for S layer pieces
+  }
+  
   // Assign colors based on the piece's ORIGINAL SOLVED position (determined by pieceId)
   // ALL faces get proper colors, not just the visible ones
   let colors = {

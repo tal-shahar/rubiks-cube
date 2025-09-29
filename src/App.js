@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
@@ -55,18 +55,62 @@ const CubeContainer = styled.div`
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 `;
 
+const DualCubeContainer = styled.div`
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 20px 0;
+`;
+
+const CubeWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+`;
+
+const CubeTitle = styled.h3`
+  color: #fff;
+  font-size: 16px;
+  margin: 0 0 10px 0;
+  text-align: center;
+`;
+
+const CubeCanvas = styled.div`
+  width: 300px;
+  height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
 function App() {
   const [isRotating, setIsRotating] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
   const [isScrambling, setIsScrambling] = useState(false);
   const [currentScramble, setCurrentScramble] = useState('');
   const [cubeState, setCubeState] = useState(null);
-  const scrambleRef = useRef();
-  const resetRef = useRef();
+  const [cubeIsAnimating, setCubeIsAnimating] = useState(false);
+  const [leftCubeState, setLeftCubeState] = useState(null);
+  const [rightCubeState, setRightCubeState] = useState(null);
+  const [leftMoveHistory, setLeftMoveHistory] = useState([]);
+  const [rightMoveHistory, setRightMoveHistory] = useState([]);
+  const leftSolveRef = useRef();
+  const rightSolveRef = useRef();
+  const leftScrambleRef = useRef();
+  const rightScrambleRef = useRef();
+  const leftResetRef = useRef();
+  const rightResetRef = useRef();
   const solveRef = useRef();
-  const rotateFaceRef = useRef();
-  const cameraResetRef = useRef();
-  const groupRef = useRef();
+  const leftRotateFaceRef = useRef();
+  const rightRotateFaceRef = useRef();
+  const leftCameraResetRef = useRef();
+  const rightCameraResetRef = useRef();
+  const leftGroupRef = useRef();
+  const rightGroupRef = useRef();
 
   // Initialize version checking and cache management
   useEffect(() => {
@@ -116,58 +160,115 @@ function App() {
   };
 
   const handleScramble = () => {
-    if (scrambleRef.current) {
-      setIsScrambling(true);
-      setCurrentScramble('Generating scramble sequence...');
-      scrambleRef.current();
-      
-      // Update scramble display after a delay
-      setTimeout(() => {
-        setCurrentScramble('F B R L U D F\' B\' R\' L\' U\' D\' F2 B2 R2 L2 U2 D2');
-        setTimeout(() => {
-          setIsScrambling(false);
-        }, 7000);
-      }, 1000);
+    if (cubeIsAnimating) return;
+    
+    console.log('🔄 DUAL SCRAMBLE: Starting scramble on both cubes...');
+    setIsScrambling(true);
+    setCurrentScramble('Generating scramble sequence...');
+    
+    // Scramble both cubes simultaneously
+    if (leftScrambleRef.current) {
+      console.log('🔄 Left cube: Starting scramble');
+      leftScrambleRef.current();
+    } else {
+      console.log('❌ Left cube: Cannot scramble - missing ref');
     }
+    
+    if (rightScrambleRef.current) {
+      console.log('🔄 Right cube: Starting scramble');
+      rightScrambleRef.current();
+    } else {
+      console.log('❌ Right cube: Cannot scramble - missing ref');
+    }
+    
+    // Update scramble display after a delay
+    setTimeout(() => {
+      setCurrentScramble('F B R L U D F\' B\' R\' L\' U\' D\' F2 B2 R2 L2 U2 D2');
+      setTimeout(() => {
+        setIsScrambling(false);
+      }, 7000);
+    }, 1000);
   };
 
   const handleReset = () => {
-    console.log('handleReset called');
-    console.log('resetRef.current:', !!resetRef.current);
-    console.log('cameraResetRef.current:', !!cameraResetRef.current);
-    console.log('groupRef.current:', !!groupRef.current);
+    if (cubeIsAnimating) return;
     
-    if (resetRef.current) {
-      setCurrentScramble('');
-      resetRef.current();
-      // Also reset camera position
-      if (cameraResetRef.current) {
-        console.log('Calling camera reset function');
-        cameraResetRef.current();
+    console.log('🔄 DUAL RESET: Starting reset on both cubes...');
+    setCurrentScramble('');
+    
+    // Reset both cubes simultaneously
+    if (leftResetRef.current) {
+      console.log('🔄 Left cube: Starting reset');
+      leftResetRef.current();
+    } else {
+      console.log('❌ Left cube: Cannot reset - missing ref');
+    }
+    
+    if (rightResetRef.current) {
+      console.log('🔄 Right cube: Starting reset');
+      rightResetRef.current();
+    } else {
+      console.log('❌ Right cube: Cannot reset - missing ref');
+    }
+    
+    // Also reset camera position for both cubes
+    if (leftCameraResetRef.current) {
+      console.log('Calling left camera reset function');
+      leftCameraResetRef.current();
+    } else {
+      console.log('Left camera reset function not available');
+    }
+    if (rightCameraResetRef.current) {
+      console.log('Calling right camera reset function');
+      rightCameraResetRef.current();
+    } else {
+      console.log('Right camera reset function not available');
+    }
+    
+    // Also reset cube rotation/orientation with a small delay
+    setTimeout(() => {
+      if (leftGroupRef.current && leftGroupRef.current.rotation) {
+        leftGroupRef.current.rotation.set(0, 0, 0);
+        console.log('Left cube rotation reset to initial orientation');
       } else {
-        console.log('Camera reset function not available');
+        console.log('Left group ref not available for rotation reset');
       }
-      // Also reset cube rotation/orientation with a small delay
-      setTimeout(() => {
-        if (groupRef.current && groupRef.current.rotation) {
-          groupRef.current.rotation.set(0, 0, 0);
-          console.log('Cube rotation reset to initial orientation');
-        } else {
-          console.log('Group ref not available for rotation reset');
-        }
-      }, 150); // Slightly longer delay to ensure camera reset completes first
-    }
+      if (rightGroupRef.current && rightGroupRef.current.rotation) {
+        rightGroupRef.current.rotation.set(0, 0, 0);
+        console.log('Right cube rotation reset to initial orientation');
+      } else {
+        console.log('Right group ref not available for rotation reset');
+      }
+    }, 150); // Slightly longer delay to ensure camera reset completes first
   };
 
-  const handleSolve = () => {
-    if (solveRef.current) {
-      setCurrentScramble('Solving cube...');
-      solveRef.current();
+  const handleSolve = useCallback(() => {
+    if (cubeIsAnimating) return;
+    
+    console.log('🧩 DUAL SOLVER: Starting solve on both cubes...');
+    setCurrentScramble('Solving cube...');
+    
+    // Left cube: Simple revert solver (will use move history internally)
+    if (leftSolveRef.current) {
+      console.log('🔄 Left cube: Using simple revert solver');
+      leftSolveRef.current(); // No parameters - will use internal move history
+    } else {
+      console.log('❌ Left cube: Cannot solve - missing ref');
     }
-  };
+    
+    // Right cube: Advanced solver  
+    if (rightSolveRef.current) {
+      console.log('🧩 Right cube: Using advanced Kociemba solver');
+      rightSolveRef.current(); // No parameters - will use advanced solver internally
+    } else {
+      console.log('❌ Right cube: Cannot solve - missing ref');
+    }
+  }, [cubeIsAnimating]);
 
-  const handleRotateFace = (face, direction) => {
-    // console.log('🎯 handleRotateFace called with:', face, direction);
+
+  const handleRotateFace = (face, direction, cubeId = 'left') => {
+    // console.log('🎯 handleRotateFace called with:', face, direction, 'for cube:', cubeId);
+    const rotateFaceRef = cubeId === 'left' ? leftRotateFaceRef : rightRotateFaceRef;
     // console.log('🎯 rotateFaceRef.current:', rotateFaceRef.current);
     if (rotateFaceRef.current) {
       // console.log('🎯 Calling rotateFaceRef.current with:', face, direction);
@@ -210,21 +311,51 @@ function App() {
       </Header>
       
       <MainContent>
-        <ErrorBoundary>
-          <CubeContainer>
-            <RubiksCube 
-              isRotating={isRotating}
-              autoRotate={autoRotate}
-              onScramble={(scrambleFn) => { scrambleRef.current = scrambleFn; }}
-              onReset={(resetFn) => { resetRef.current = resetFn; }}
-              onSolve={(solveFn) => { solveRef.current = solveFn; }}
-              onRotateFace={(rotateFaceFn) => { rotateFaceRef.current = rotateFaceFn; }}
-              onCameraReset={(cameraResetFn) => { cameraResetRef.current = cameraResetFn; }}
-              onGroupRef={(groupRefFn) => { groupRef.current = groupRefFn; }}
-              onCubeStateChange={setCubeState}
-            />
-          </CubeContainer>
-        </ErrorBoundary>
+        <DualCubeContainer>
+          <CubeWrapper>
+            <CubeTitle>Simple Revert Solver</CubeTitle>
+            <CubeCanvas>
+              <CubeContainer style={{ width: '300px', height: '300px' }}>
+                <RubiksCube 
+                  isRotating={isRotating}
+                  autoRotate={autoRotate}
+                  onScramble={(scrambleFn) => { leftScrambleRef.current = scrambleFn; }}
+                  onReset={(resetFn) => { leftResetRef.current = resetFn; }}
+                  onSolveRef={leftSolveRef}
+                  onRotateFace={(rotateFaceFn) => { leftRotateFaceRef.current = rotateFaceFn; }}
+                  onCameraReset={(cameraResetFn) => { leftCameraResetRef.current = cameraResetFn; }}
+                  onGroupRef={(groupRefFn) => { leftGroupRef.current = groupRefFn; }}
+                  onCubeStateChange={setLeftCubeState}
+                  onAnimationStateChange={setCubeIsAnimating}
+                  cubeId="left"
+                  onMoveHistoryChange={setLeftMoveHistory}
+                />
+              </CubeContainer>
+            </CubeCanvas>
+          </CubeWrapper>
+          
+          <CubeWrapper>
+            <CubeTitle>Advanced Kociemba Solver</CubeTitle>
+            <CubeCanvas>
+              <CubeContainer style={{ width: '300px', height: '300px' }}>
+                <RubiksCube 
+                  isRotating={isRotating}
+                  autoRotate={autoRotate}
+                  onScramble={(scrambleFn) => { rightScrambleRef.current = scrambleFn; }}
+                  onReset={(resetFn) => { rightResetRef.current = resetFn; }}
+                  onSolveRef={rightSolveRef}
+                  onRotateFace={(rotateFaceFn) => { rightRotateFaceRef.current = rotateFaceFn; }}
+                  onCameraReset={(cameraResetFn) => { rightCameraResetRef.current = cameraResetFn; }}
+                  onGroupRef={(groupRefFn) => { rightGroupRef.current = groupRefFn; }}
+                  onCubeStateChange={setRightCubeState}
+                  onAnimationStateChange={setCubeIsAnimating}
+                  cubeId="right"
+                  onMoveHistoryChange={setRightMoveHistory}
+                />
+              </CubeContainer>
+            </CubeCanvas>
+          </CubeWrapper>
+        </DualCubeContainer>
         
         <ErrorBoundary>
           <Controls 
@@ -235,8 +366,14 @@ function App() {
             onScramble={handleScramble}
             onReset={handleReset}
             onSolve={handleSolve}
+            leftSolveRef={leftSolveRef}
+            rightSolveRef={rightSolveRef}
             onRotateFace={handleRotateFace}
-            cubeState={cubeState}
+            cubeState={leftCubeState}
+            rightCubeState={rightCubeState}
+            leftMoveHistory={leftMoveHistory}
+            rightMoveHistory={rightMoveHistory}
+            cubeIsAnimating={cubeIsAnimating}
             onOpenKeybindingModal={handleOpenKeybindingModal}
           />
         </ErrorBoundary>

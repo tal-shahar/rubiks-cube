@@ -1,4 +1,4 @@
-name: Deploy to AWS S3
+name: Deploy to Production
 
 on:
   push:
@@ -7,45 +7,67 @@ on:
     branches: [ main ]
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
-        
+    
     - name: Install dependencies
       run: npm ci
-      
+    
     - name: Run tests
-      run: npm test -- --coverage --watchAll=false
-      
-    - name: Build application
+      run: npm test -- --watchAll=false --coverage
+    
+    - name: Run build
       run: npm run build
-      
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: build/
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build for production
+      run: npm run build
+    
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-        
+        aws-region: us-east-1
+    
     - name: Deploy to S3
       run: npm run deploy:s3
       env:
         AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
         CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
-        
-    - name: Invalidate CloudFront cache
-      if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
-      run: |
-        aws cloudfront create-invalidation \
-          --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-          --paths "/*"
+    
+    - name: Invalidate CloudFront
+      run: npm run invalidate-cache
+      env:
+        CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}

@@ -21,7 +21,8 @@ export function CubeGroup({
   onSolve, 
   onRotateFace, 
   onCubeStateChange, 
-  onGroupRef
+  onGroupRef,
+  cubeId = 'unknown'
 }) {
   // Debug: Log when CubeGroup receives new state
   // console.log('🎨 CubeGroup received state with', cubeState?.length || 0, 'pieces');
@@ -66,9 +67,11 @@ export function CubeGroup({
   }
   const groupRef = useRef();
   const [rotationSpeed] = useState({ x: 0.005, y: 0.01 });
+  const onSolveCalledRef = useRef(false);
   
   // Set up refs for parent component
   React.useEffect(() => {
+    console.log(`🔧 CubeGroup (${cubeId}): Setting up refs - solve function changed`);
     if (onRotateFace) {
       onRotateFace(rotateFaceWithAnimation);
     }
@@ -78,10 +81,9 @@ export function CubeGroup({
     if (onReset) {
       onReset(reset);
     }
-    if (onSolve) {
-      onSolve(solve);
-    }
-  }, [rotateFace, scramble, reset, solve, onRotateFace, onScramble, onReset, onSolve]);
+    // Don't call onSolve during setup - it should only be called when the user clicks solve
+    // The parent component will get the solve function through the ref system
+  }, [rotateFace, scramble, reset, onRotateFace, onScramble, onReset, cubeId]);
 
   // Set up group ref callback
   const setGroupRef = React.useCallback((ref) => {
@@ -157,9 +159,11 @@ export function CubeGroup({
     const sign = direction === 'clockwise' ? 1 : -1;
     const angle = (Math.PI / 2) * rotationProgress * sign; // 90 degrees total
 
-    // Log rotation angle calculation
-    console.log(`🎯 getRotationAngle: ${face} ${direction} - progress: ${rotationProgress.toFixed(3)}, angle: ${angle.toFixed(3)}`);
-    logToTerminal(`🎯 getRotationAngle`, { face, direction, progress: rotationProgress.toFixed(3), angle: angle.toFixed(3) }, 'INFO');
+    // Only log rotation angle calculation when there's actual rotation progress
+    if (rotationProgress > 0) {
+      console.log(`🎯 getRotationAngle (cube ${cubeId}): ${face} ${direction} - progress: ${rotationProgress.toFixed(3)}, angle: ${angle.toFixed(3)}`);
+      logToTerminal(`🎯 getRotationAngle`, { cubeId, face, direction, progress: rotationProgress.toFixed(3), angle: angle.toFixed(3) }, 'INFO');
+    }
 
     switch (face) {
       case 'F': return { x: 0, y: 0, z: angle };

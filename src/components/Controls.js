@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
+import { advancedSolver } from '../utils/advancedSolver';
+import { isRotationEnabled, getRotationInfo, toggleRotation, getDisabledRotations } from '../utils/rotationConfig';
 
 const ControlsContainer = styled.div`
   display: flex;
@@ -184,6 +186,18 @@ const SButton = styled(FaceButton)`
   &:hover {
     background: linear-gradient(135deg, #008B8B 0%, #006666 100%);
   }
+  
+  &:disabled {
+    background: linear-gradient(135deg, #666666 0%, #555555 100%);
+    color: #999999;
+    cursor: not-allowed;
+    opacity: 0.5;
+    
+    &:hover {
+      background: linear-gradient(135deg, #666666 0%, #555555 100%);
+      transform: none;
+    }
+  }
 `;
 
 const FaceButtonGroup = styled.div`
@@ -202,6 +216,68 @@ const Label = styled.h3`
   text-align: center;
 `;
 
+const SolverInfo = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 200px;
+`;
+
+const SolverText = styled.div`
+  color: white;
+  font-size: 12px;
+  text-align: center;
+  margin: 2px 0;
+`;
+
+const SolverMethod = styled.div`
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  margin: 5px 0;
+`;
+
+const AdminPanel = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 200px;
+`;
+
+const AdminTitle = styled.h4`
+  color: #ff6b6b;
+  font-size: 12px;
+  text-align: center;
+  margin: 0 0 8px 0;
+`;
+
+const DisabledRotation = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 0;
+  font-size: 11px;
+`;
+
+const EnableButton = styled.button`
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 10px;
+  cursor: pointer;
+  
+  &:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  }
+`;
+
 function Controls({ 
   isRotating, 
   setIsRotating, 
@@ -210,46 +286,92 @@ function Controls({
   onScramble,
   onReset,
   onSolve,
+  leftSolveRef, // New prop for left cube's solve function
+  rightSolveRef, // New prop for right cube's solve function
   onRotateFace,
   cubeState,
+  rightCubeState,
+  leftMoveHistory, // New prop for left cube's move history
+  rightMoveHistory, // New prop for right cube's move history
+  cubeIsAnimating, // Add this prop to receive cube animation state
   onOpenKeybindingModal
 }) {
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [solverInfo, setSolverInfo] = useState({ method: 'Ready', complexity: 'Unknown' });
   const { isKeyboardDevice } = useDeviceDetection();
 
+  // Analyze cube state when it changes
+  useEffect(() => {
+    console.log('🔍 Controls: Cube state changed:', cubeState);
+    
+    if (cubeState && Array.isArray(cubeState)) {
+      console.log('🔍 Controls: Analyzing cube state with', cubeState.length, 'pieces');
+      
+      const complexity = advancedSolver.analyzeComplexity(cubeState);
+      const isSolved = advancedSolver.isSolved(cubeState);
+      
+      console.log('🔍 Controls: Analysis results:', { complexity, isSolved });
+      
+      setSolverInfo({
+        method: isSolved ? 'Already Solved!' : `${complexity.difficulty} (${complexity.score}/100)`,
+        complexity: complexity.difficulty,
+        score: complexity.score,
+        isSolved: isSolved
+      });
+    } else {
+      console.log('🔍 Controls: No valid cube state, setting default');
+      setSolverInfo({ method: 'Ready', complexity: 'Unknown' });
+    }
+  }, [cubeState]);
+
   const handleReset = () => {
-    if (isAnimating || !onReset) return;
-    setIsAnimating(true);
+    if (cubeIsAnimating || !onReset) return;
     console.log('Reset cube');
     onReset();
-    // Simulate animation delay
-    setTimeout(() => setIsAnimating(false), 1000);
   };
 
   const handleScramble = () => {
-    if (isAnimating || !onScramble) return;
-    setIsAnimating(true);
+    if (cubeIsAnimating || !onScramble) return;
     console.log('Scramble cube');
     onScramble();
-    // Simulate animation delay
-    setTimeout(() => setIsAnimating(false), 8000); // Longer delay for scramble
+  };
+
+  // Simple revert steps solver (old method)
+  const simpleRevertSolver = (moveHistory) => {
+    if (!moveHistory || moveHistory.length === 0) {
+      return [];
+    }
+    
+    // Create reverse sequence by reversing each move
+    const reverseSequence = moveHistory
+      .slice()
+      .reverse()
+      .map(move => ({
+        face: move.face,
+        direction: move.direction === 'clockwise' ? 'counterclockwise' : 'clockwise'
+      }));
+    
+    return reverseSequence;
   };
 
   const handleSolve = () => {
-    if (isAnimating || !onSolve) return;
-    setIsAnimating(true);
-    console.log('Solve cube');
-    onSolve(); // Use the animated solve function
-    // Simulate animation delay
-    setTimeout(() => setIsAnimating(false), 10000); // Longer delay for solve animation
+    if (cubeIsAnimating) return;
+    
+    console.log('🧩 DUAL SOLVER: Starting solve on both cubes...');
+    console.log('🔍 Debug - leftSolveRef:', leftSolveRef);
+    console.log('🔍 Debug - rightSolveRef:', rightSolveRef);
+    
+    // Call the parent's handleSolve function which will handle both cubes
+    if (onSolve) {
+      onSolve();
+    }
   };
 
   const handleFaceRotation = (face, direction) => {
     // console.log(`🔵 handleFaceRotation called: ${face} ${direction}`);
-    // console.log(`🔵 isAnimating: ${isAnimating}`);
+    // console.log(`🔵 cubeIsAnimating: ${cubeIsAnimating}`);
     // console.log(`🔵 onRotateFace exists: ${!!onRotateFace}`);
     
-    if (isAnimating) {
+    if (cubeIsAnimating) {
       // console.log(`🔵 BLOCKED: Animation in progress`);
       return;
     }
@@ -299,7 +421,7 @@ function Controls({
         <FaceButtonGroup>
           <MButton onClick={() => handleFaceRotation('M', 'clockwise')}>M</MButton>
           <EButton onClick={() => handleFaceRotation('E', 'clockwise')}>E</EButton>
-          <SButton onClick={() => handleFaceRotation('S', 'clockwise')}>S</SButton>
+          <SButton onClick={() => handleFaceRotation('S', 'clockwise')} disabled={!isRotationEnabled('S')}>S</SButton>
         </FaceButtonGroup>
       </ButtonGroup>
 
@@ -308,28 +430,28 @@ function Controls({
         <FaceButtonGroup>
           <MButton onClick={() => handleFaceRotation('M', 'counterclockwise')}>M'</MButton>
           <EButton onClick={() => handleFaceRotation('E', 'counterclockwise')}>E'</EButton>
-          <SButton onClick={() => handleFaceRotation('S', 'counterclockwise')}>S'</SButton>
+          <SButton onClick={() => handleFaceRotation('S', 'counterclockwise')} disabled={!isRotationEnabled('S')}>S'</SButton>
         </FaceButtonGroup>
       </ButtonGroup>
 
       <ButtonGroup>
         <ActionButton 
           onClick={handleReset}
-          disabled={isAnimating}
+          disabled={cubeIsAnimating}
         >
-          {isAnimating ? 'Resetting...' : 'Reset'}
+          {cubeIsAnimating ? 'Resetting...' : 'Reset'}
         </ActionButton>
         <ActionButton 
           onClick={handleScramble}
-          disabled={isAnimating}
+          disabled={cubeIsAnimating}
         >
-          {isAnimating ? 'Scrambling...' : 'Scramble'}
+          {cubeIsAnimating ? 'Scrambling...' : 'Scramble'}
         </ActionButton>
         <ActionButton 
           onClick={handleSolve}
-          disabled={isAnimating}
+          disabled={cubeIsAnimating}
         >
-          {isAnimating ? 'Solving...' : 'Solve'}
+          {cubeIsAnimating ? 'Solving...' : 'Solve'}
         </ActionButton>
       </ButtonGroup>
 
@@ -356,6 +478,40 @@ function Controls({
             ⚙️ Customize Keys
           </SettingsButton>
         </ButtonGroup>
+      )}
+
+      <SolverInfo>
+        <Label>🧩 Advanced Solver</Label>
+        <SolverMethod>{solverInfo.method}</SolverMethod>
+        <SolverText>
+          {solverInfo.isSolved ? '✅ Cube is solved!' : `Complexity: ${solverInfo.complexity}`}
+        </SolverText>
+        <SolverText>
+          {solverInfo.isSolved ? '' : `Score: ${solverInfo.score || 0}/100`}
+        </SolverText>
+      </SolverInfo>
+
+      {getDisabledRotations().length > 0 && (
+        <AdminPanel>
+          <AdminTitle>🔧 Disabled Rotations</AdminTitle>
+          {getDisabledRotations().map(({ face, name, reason }) => (
+            <DisabledRotation key={face}>
+              <span>{name} ({face})</span>
+              <EnableButton onClick={() => {
+                toggleRotation(face);
+                // Force re-render by updating a dummy state
+                setSolverInfo(prev => ({ ...prev }));
+              }}>
+                Enable
+              </EnableButton>
+            </DisabledRotation>
+          ))}
+          {getDisabledRotations().some(r => r.reason) && (
+            <div style={{ fontSize: '10px', color: '#ccc', marginTop: '4px' }}>
+              * {getDisabledRotations().find(r => r.reason)?.reason}
+            </div>
+          )}
+        </AdminPanel>
       )}
     </ControlsContainer>
   );
