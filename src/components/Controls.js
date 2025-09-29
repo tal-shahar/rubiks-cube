@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { advancedSolver } from '../utils/advancedSolver';
-import { isRotationEnabled, getRotationInfo, toggleRotation, getDisabledRotations } from '../utils/rotationConfig';
+import { isRotationEnabled, getRotationInfo, toggleRotation, getDisabledRotations, hasPermission } from '../utils/rotationConfig';
 
 const ControlsContainer = styled.div`
   display: flex;
@@ -301,15 +301,9 @@ function Controls({
 
   // Analyze cube state when it changes
   useEffect(() => {
-    console.log('🔍 Controls: Cube state changed:', cubeState);
-    
     if (cubeState && Array.isArray(cubeState)) {
-      console.log('🔍 Controls: Analyzing cube state with', cubeState.length, 'pieces');
-      
       const complexity = advancedSolver.analyzeComplexity(cubeState);
       const isSolved = advancedSolver.isSolved(cubeState);
-      
-      console.log('🔍 Controls: Analysis results:', { complexity, isSolved });
       
       setSolverInfo({
         method: isSolved ? 'Already Solved!' : `${complexity.difficulty} (${complexity.score}/100)`,
@@ -318,20 +312,17 @@ function Controls({
         isSolved: isSolved
       });
     } else {
-      console.log('🔍 Controls: No valid cube state, setting default');
       setSolverInfo({ method: 'Ready', complexity: 'Unknown' });
     }
   }, [cubeState]);
 
   const handleReset = () => {
     if (cubeIsAnimating || !onReset) return;
-    console.log('Reset cube');
     onReset();
   };
 
   const handleScramble = () => {
     if (cubeIsAnimating || !onScramble) return;
-    console.log('Scramble cube');
     onScramble();
   };
 
@@ -356,10 +347,6 @@ function Controls({
   const handleSolve = () => {
     if (cubeIsAnimating) return;
     
-    console.log('🧩 DUAL SOLVER: Starting solve on both cubes...');
-    console.log('🔍 Debug - leftSolveRef:', leftSolveRef);
-    console.log('🔍 Debug - rightSolveRef:', rightSolveRef);
-    
     // Call the parent's handleSolve function which will handle both cubes
     if (onSolve) {
       onSolve();
@@ -367,21 +354,14 @@ function Controls({
   };
 
   const handleFaceRotation = (face, direction) => {
-    // console.log(`🔵 handleFaceRotation called: ${face} ${direction}`);
-    // console.log(`🔵 cubeIsAnimating: ${cubeIsAnimating}`);
-    // console.log(`🔵 onRotateFace exists: ${!!onRotateFace}`);
-    
     if (cubeIsAnimating) {
-      // console.log(`🔵 BLOCKED: Animation in progress`);
       return;
     }
     
     if (!onRotateFace) {
-      // console.log(`🔵 BLOCKED: onRotateFace function not available`);
       return;
     }
     
-    // console.log(`🔵 Calling onRotateFace: ${face} ${direction}`);
     onRotateFace(face, direction);
   };
 
@@ -498,9 +478,15 @@ function Controls({
             <DisabledRotation key={face}>
               <span>{name} ({face})</span>
               <EnableButton onClick={() => {
-                toggleRotation(face);
-                // Force re-render by updating a dummy state
-                setSolverInfo(prev => ({ ...prev }));
+                if (hasPermission('canToggleRotation')) {
+                  const success = toggleRotation(face);
+                  if (success) {
+                    // Force re-render by updating a dummy state
+                    setSolverInfo(prev => ({ ...prev }));
+                  }
+                } else {
+                  alert('Permission denied: You do not have permission to toggle rotation settings.');
+                }
               }}>
                 Enable
               </EnableButton>

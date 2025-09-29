@@ -1,6 +1,26 @@
 // Rotation configuration - controls which rotations are enabled/disabled
 // This affects buttons, keybindings, scramble, and all other rotation access points
 
+// Permission system for rotation management
+const ROTATION_PERMISSIONS = {
+  canToggleRotation: false, // Only admin/system can toggle rotations
+  canEnableRotation: false, // Only admin/system can enable rotations
+  canDisableRotation: false, // Only admin/system can disable rotations
+};
+
+// Permission management functions
+export const setRotationPermissions = (permissions) => {
+  Object.assign(ROTATION_PERMISSIONS, permissions);
+};
+
+export const getRotationPermissions = () => {
+  return { ...ROTATION_PERMISSIONS };
+};
+
+export const hasPermission = (permission) => {
+  return ROTATION_PERMISSIONS[permission] === true;
+};
+
 export const ROTATION_CONFIG = {
   // Basic face rotations
   R: { enabled: true, name: 'Right', color: '#DC143C' },
@@ -43,8 +63,12 @@ export const getKeybindingRotations = () => {
   return getEnabledRotations();
 };
 
-// Toggle rotation enabled/disabled
+// Toggle rotation enabled/disabled (requires permission)
 export const toggleRotation = (face) => {
+  if (!hasPermission('canToggleRotation')) {
+    return false;
+  }
+  
   if (ROTATION_CONFIG[face]) {
     ROTATION_CONFIG[face].enabled = !ROTATION_CONFIG[face].enabled;
     return ROTATION_CONFIG[face].enabled;
@@ -52,8 +76,14 @@ export const toggleRotation = (face) => {
   return false;
 };
 
-// Enable/disable specific rotation
+// Enable/disable specific rotation (requires permission)
 export const setRotationEnabled = (face, enabled) => {
+  const requiredPermission = enabled ? 'canEnableRotation' : 'canDisableRotation';
+  
+  if (!hasPermission(requiredPermission)) {
+    return false;
+  }
+  
   if (ROTATION_CONFIG[face]) {
     ROTATION_CONFIG[face].enabled = enabled;
     return true;
@@ -64,4 +94,24 @@ export const setRotationEnabled = (face, enabled) => {
 // Get rotation info
 export const getRotationInfo = (face) => {
   return ROTATION_CONFIG[face] || null;
+};
+
+// Admin function to grant rotation management permissions
+export const grantRotationPermissions = (permissions = {}) => {
+  const defaultPermissions = {
+    canToggleRotation: true,
+    canEnableRotation: true,
+    canDisableRotation: true,
+  };
+  
+  setRotationPermissions({ ...defaultPermissions, ...permissions });
+};
+
+// Admin function to revoke rotation management permissions
+export const revokeRotationPermissions = () => {
+  setRotationPermissions({
+    canToggleRotation: false,
+    canEnableRotation: false,
+    canDisableRotation: false,
+  });
 };

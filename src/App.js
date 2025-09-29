@@ -8,6 +8,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { useKeybindings } from './hooks/useKeybindings';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 // import { initializeVersionCheck } from './utils/version';
+// import { grantRotationPermissions } from './utils/rotationConfig'; // Uncomment to enable rotation management
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -115,6 +116,9 @@ function App() {
   // Initialize version checking and cache management
   useEffect(() => {
     // initializeVersionCheck(); // Temporarily disabled to prevent reload loops
+    
+    // To enable rotation management permissions, uncomment the following:
+    // grantRotationPermissions();
   }, []);
 
   // Initialize keybinding system
@@ -162,23 +166,16 @@ function App() {
   const handleScramble = () => {
     if (cubeIsAnimating) return;
     
-    console.log('🔄 DUAL SCRAMBLE: Starting scramble on both cubes...');
     setIsScrambling(true);
     setCurrentScramble('Generating scramble sequence...');
     
     // Scramble both cubes simultaneously
     if (leftScrambleRef.current) {
-      console.log('🔄 Left cube: Starting scramble');
       leftScrambleRef.current();
-    } else {
-      console.log('❌ Left cube: Cannot scramble - missing ref');
     }
     
     if (rightScrambleRef.current) {
-      console.log('🔄 Right cube: Starting scramble');
       rightScrambleRef.current();
-    } else {
-      console.log('❌ Right cube: Cannot scramble - missing ref');
     }
     
     // Update scramble display after a delay
@@ -193,51 +190,32 @@ function App() {
   const handleReset = () => {
     if (cubeIsAnimating) return;
     
-    console.log('🔄 DUAL RESET: Starting reset on both cubes...');
     setCurrentScramble('');
     
     // Reset both cubes simultaneously
     if (leftResetRef.current) {
-      console.log('🔄 Left cube: Starting reset');
       leftResetRef.current();
-    } else {
-      console.log('❌ Left cube: Cannot reset - missing ref');
     }
     
     if (rightResetRef.current) {
-      console.log('🔄 Right cube: Starting reset');
       rightResetRef.current();
-    } else {
-      console.log('❌ Right cube: Cannot reset - missing ref');
     }
     
     // Also reset camera position for both cubes
     if (leftCameraResetRef.current) {
-      console.log('Calling left camera reset function');
       leftCameraResetRef.current();
-    } else {
-      console.log('Left camera reset function not available');
     }
     if (rightCameraResetRef.current) {
-      console.log('Calling right camera reset function');
       rightCameraResetRef.current();
-    } else {
-      console.log('Right camera reset function not available');
     }
     
     // Also reset cube rotation/orientation with a small delay
     setTimeout(() => {
       if (leftGroupRef.current && leftGroupRef.current.rotation) {
         leftGroupRef.current.rotation.set(0, 0, 0);
-        console.log('Left cube rotation reset to initial orientation');
-      } else {
-        console.log('Left group ref not available for rotation reset');
       }
       if (rightGroupRef.current && rightGroupRef.current.rotation) {
         rightGroupRef.current.rotation.set(0, 0, 0);
-        console.log('Right cube rotation reset to initial orientation');
-      } else {
-        console.log('Right group ref not available for rotation reset');
       }
     }, 150); // Slightly longer delay to ensure camera reset completes first
   };
@@ -245,41 +223,28 @@ function App() {
   const handleSolve = useCallback(() => {
     if (cubeIsAnimating) return;
     
-    console.log('🧩 DUAL SOLVER: Starting solve on both cubes...');
     setCurrentScramble('Solving cube...');
     
     // Left cube: Simple revert solver (will use move history internally)
     if (leftSolveRef.current) {
-      console.log('🔄 Left cube: Using simple revert solver');
       leftSolveRef.current(); // No parameters - will use internal move history
-    } else {
-      console.log('❌ Left cube: Cannot solve - missing ref');
     }
     
     // Right cube: Advanced solver  
     if (rightSolveRef.current) {
-      console.log('🧩 Right cube: Using advanced Kociemba solver');
       rightSolveRef.current(); // No parameters - will use advanced solver internally
-    } else {
-      console.log('❌ Right cube: Cannot solve - missing ref');
     }
   }, [cubeIsAnimating]);
 
 
   const handleRotateFace = (face, direction, cubeId = 'left') => {
-    // console.log('🎯 handleRotateFace called with:', face, direction, 'for cube:', cubeId);
     const rotateFaceRef = cubeId === 'left' ? leftRotateFaceRef : rightRotateFaceRef;
-    // console.log('🎯 rotateFaceRef.current:', rotateFaceRef.current);
     if (rotateFaceRef.current) {
-      // console.log('🎯 Calling rotateFaceRef.current with:', face, direction);
       try {
         rotateFaceRef.current(face, direction);
-        // console.log('🎯 rotateFaceRef.current call completed successfully');
       } catch (error) {
-        // console.log('🎯 ERROR calling rotateFaceRef.current:', error);
+        // Silently handle errors in production
       }
-    } else {
-      // console.log('🎯 ERROR: rotateFaceRef.current is null!');
     }
   };
 
@@ -292,12 +257,10 @@ function App() {
 
     // Add event listener
     window.addEventListener('keydown', handleKeyDown);
-    // console.log('🔑 Keyboard event listener added');
 
     // Cleanup
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      // console.log('🔑 Keyboard event listener removed');
     };
   }, [handleKeyPress]);
 
