@@ -4,8 +4,11 @@ import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
 import KeybindingModal from './components/KeybindingModal';
+// import ErrorBoundary from './components/ErrorBoundary';
 import { useKeybindings } from './hooks/useKeybindings';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
+// import { initializeVersionCheck } from './utils/version';
+// import { grantRotationPermissions } from './utils/rotationConfig'; // Uncomment to enable rotation management
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -72,6 +75,17 @@ const MainContent = styled.main`
   }
 `;
 
+const CubeContainer = styled.div`
+  width: 100%;
+  height: 600px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+`;
+
 const DualCubeContainer = styled.div`
   display: flex;
   gap: 20px;
@@ -131,17 +145,6 @@ const CubeCanvas = styled.div`
   }
 `;
 
-const CubeContainer = styled.div`
-  width: 100%;
-  height: 600px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-`;
-
 function App() {
   const [isRotating, setIsRotating] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
@@ -153,19 +156,27 @@ function App() {
   const [rightCubeState, setRightCubeState] = useState(null);
   const [leftMoveHistory, setLeftMoveHistory] = useState([]);
   const [rightMoveHistory, setRightMoveHistory] = useState([]);
-  
   const leftSolveRef = useRef();
   const rightSolveRef = useRef();
   const leftScrambleRef = useRef();
   const rightScrambleRef = useRef();
   const leftResetRef = useRef();
   const rightResetRef = useRef();
+  const solveRef = useRef();
   const leftRotateFaceRef = useRef();
   const rightRotateFaceRef = useRef();
   const leftCameraResetRef = useRef();
   const rightCameraResetRef = useRef();
   const leftGroupRef = useRef();
   const rightGroupRef = useRef();
+
+  // Initialize version checking and cache management
+  useEffect(() => {
+    // initializeVersionCheck(); // Temporarily disabled to prevent reload loops
+    
+    // To enable rotation management permissions, uncomment the following:
+    // grantRotationPermissions();
+  }, []);
 
   // Initialize keybinding system
   const {
@@ -186,6 +197,7 @@ function App() {
   const { isKeyboardDevice } = useDeviceDetection();
 
   const handleOpenKeybindingModal = async () => {
+    // Request permission before opening the modal
     if (requestPermissionOnOpen) {
       await requestPermissionOnOpen();
     }
@@ -214,6 +226,7 @@ function App() {
     setIsScrambling(true);
     setCurrentScramble('Generating scramble sequence...');
     
+    // Scramble both cubes simultaneously
     if (leftScrambleRef.current) {
       leftScrambleRef.current();
     }
@@ -222,6 +235,7 @@ function App() {
       rightScrambleRef.current();
     }
     
+    // Update scramble display after a delay
     setTimeout(() => {
       setCurrentScramble('F B R L U D F\' B\' R\' L\' U\' D\' F2 B2 R2 L2 U2 D2');
       setTimeout(() => {
@@ -235,6 +249,7 @@ function App() {
     
     setCurrentScramble('');
     
+    // Reset both cubes simultaneously
     if (leftResetRef.current) {
       leftResetRef.current();
     }
@@ -243,6 +258,7 @@ function App() {
       rightResetRef.current();
     }
     
+    // Also reset camera position for both cubes
     if (leftCameraResetRef.current) {
       leftCameraResetRef.current();
     }
@@ -250,6 +266,7 @@ function App() {
       rightCameraResetRef.current();
     }
     
+    // Also reset cube rotation/orientation with a small delay
     setTimeout(() => {
       if (leftGroupRef.current && leftGroupRef.current.rotation) {
         leftGroupRef.current.rotation.set(0, 0, 0);
@@ -257,7 +274,7 @@ function App() {
       if (rightGroupRef.current && rightGroupRef.current.rotation) {
         rightGroupRef.current.rotation.set(0, 0, 0);
       }
-    }, 150);
+    }, 150); // Slightly longer delay to ensure camera reset completes first
   };
 
   const handleSolve = useCallback(() => {
@@ -265,14 +282,17 @@ function App() {
     
     setCurrentScramble('Solving cube...');
     
+    // Left cube: Simple revert solver (will use move history internally)
     if (leftSolveRef.current) {
-      leftSolveRef.current();
+      leftSolveRef.current(); // No parameters - will use internal move history
     }
     
+    // Right cube: Advanced solver  
     if (rightSolveRef.current) {
-      rightSolveRef.current();
+      rightSolveRef.current(); // No parameters - will use advanced solver internally
     }
   }, [cubeIsAnimating]);
+
 
   const handleRotateFace = (face, direction, cubeId = 'left') => {
     const rotateFaceRef = cubeId === 'left' ? leftRotateFaceRef : rightRotateFaceRef;
@@ -288,15 +308,20 @@ function App() {
   // Add keyboard event handling with keybinding support
   useEffect(() => {
     const handleKeyDown = (event) => {
+      // Use the keybinding system to handle key presses
       handleKeyPress(event, handleRotateFace);
     };
 
+    // Add event listener
     window.addEventListener('keydown', handleKeyDown);
 
+    // Cleanup
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [handleKeyPress]);
+
+
 
   return (
     <AppContainer>
@@ -390,4 +415,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 
