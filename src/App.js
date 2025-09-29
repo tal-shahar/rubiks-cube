@@ -4,9 +4,10 @@ import { RubiksCube } from './components/cube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
 import KeybindingModal from './components/KeybindingModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { useKeybindings } from './hooks/useKeybindings';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
-import { initializeVersionCheck } from './utils/version';
+// import { initializeVersionCheck } from './utils/version';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -69,7 +70,7 @@ function App() {
 
   // Initialize version checking and cache management
   useEffect(() => {
-    initializeVersionCheck();
+    // initializeVersionCheck(); // Temporarily disabled to prevent reload loops
   }, []);
 
   // Initialize keybinding system
@@ -209,37 +210,43 @@ function App() {
       </Header>
       
       <MainContent>
-        <CubeContainer>
-          <RubiksCube 
+        <ErrorBoundary>
+          <CubeContainer>
+            <RubiksCube 
+              isRotating={isRotating}
+              autoRotate={autoRotate}
+              onScramble={(scrambleFn) => { scrambleRef.current = scrambleFn; }}
+              onReset={(resetFn) => { resetRef.current = resetFn; }}
+              onSolve={(solveFn) => { solveRef.current = solveFn; }}
+              onRotateFace={(rotateFaceFn) => { rotateFaceRef.current = rotateFaceFn; }}
+              onCameraReset={(cameraResetFn) => { cameraResetRef.current = cameraResetFn; }}
+              onGroupRef={(groupRefFn) => { groupRef.current = groupRefFn; }}
+              onCubeStateChange={setCubeState}
+            />
+          </CubeContainer>
+        </ErrorBoundary>
+        
+        <ErrorBoundary>
+          <Controls 
             isRotating={isRotating}
+            setIsRotating={setIsRotating}
             autoRotate={autoRotate}
-            onScramble={(scrambleFn) => { scrambleRef.current = scrambleFn; }}
-            onReset={(resetFn) => { resetRef.current = resetFn; }}
-            onSolve={(solveFn) => { solveRef.current = solveFn; }}
-            onRotateFace={(rotateFaceFn) => { rotateFaceRef.current = rotateFaceFn; }}
-            onCameraReset={(cameraResetFn) => { cameraResetRef.current = cameraResetFn; }}
-            onGroupRef={(groupRefFn) => { groupRef.current = groupRefFn; }}
-            onCubeStateChange={setCubeState}
+            setAutoRotate={setAutoRotate}
+            onScramble={handleScramble}
+            onReset={handleReset}
+            onSolve={handleSolve}
+            onRotateFace={handleRotateFace}
+            cubeState={cubeState}
+            onOpenKeybindingModal={handleOpenKeybindingModal}
           />
-        </CubeContainer>
+        </ErrorBoundary>
         
-        <Controls 
-          isRotating={isRotating}
-          setIsRotating={setIsRotating}
-          autoRotate={autoRotate}
-          setAutoRotate={setAutoRotate}
-          onScramble={handleScramble}
-          onReset={handleReset}
-          onSolve={handleSolve}
-          onRotateFace={handleRotateFace}
-          cubeState={cubeState}
-          onOpenKeybindingModal={handleOpenKeybindingModal}
-        />
-        
-        <InfoPanel 
-          currentScramble={currentScramble}
-          isScrambling={isScrambling}
-        />
+        <ErrorBoundary>
+          <InfoPanel 
+            currentScramble={currentScramble}
+            isScrambling={isScrambling}
+          />
+        </ErrorBoundary>
       </MainContent>
 
       {isKeyboardDevice && (
