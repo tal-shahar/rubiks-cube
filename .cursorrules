@@ -3,6 +3,14 @@
 ## Production Readiness Trigger
 When the user types "get ready for prod", execute the following production readiness workflow:
 
+### 0. Pre-Flight Check
+- Check git status to identify current changes and their scope
+- Analyze the nature of changes (code, docs, config, tests, etc.)
+- Determine if changes justify the full production readiness workflow
+- If only minor documentation or cosmetic changes exist, provide a streamlined assessment
+- If significant code changes exist, proceed with the full workflow
+- Display a summary of changes found and the justification for the chosen approach
+
 ### 1. Acknowledge CURSOR Rule
 - Confirm this is a CURSOR rule being executed
 - Display the production readiness checklist

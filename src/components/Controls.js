@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useDeviceDetection } from '../hooks/useDeviceDetection';
 import { advancedSolver } from '../utils/advancedSolver';
-import { isRotationEnabled, getRotationInfo, toggleRotation, getDisabledRotations, hasPermission } from '../utils/rotationConfig';
+import { isRotationEnabled, getRotationInfo } from '../utils/rotationConfig';
 
 const ControlsContainer = styled.div`
   display: flex;
@@ -240,43 +240,6 @@ const SolverMethod = styled.div`
   margin: 5px 0;
 `;
 
-const AdminPanel = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  min-width: 200px;
-`;
-
-const AdminTitle = styled.h4`
-  color: #ff6b6b;
-  font-size: 12px;
-  text-align: center;
-  margin: 0 0 8px 0;
-`;
-
-const DisabledRotation = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 4px 0;
-  font-size: 11px;
-`;
-
-const EnableButton = styled.button`
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-size: 10px;
-  cursor: pointer;
-  
-  &:hover {
-    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
-  }
-`;
 
 function Controls({ 
   isRotating, 
@@ -471,34 +434,6 @@ function Controls({
         </SolverText>
       </SolverInfo>
 
-      {getDisabledRotations().length > 0 && (
-        <AdminPanel>
-          <AdminTitle>🔧 Disabled Rotations</AdminTitle>
-          {getDisabledRotations().map(({ face, name, reason }) => (
-            <DisabledRotation key={face}>
-              <span>{name} ({face})</span>
-              <EnableButton onClick={() => {
-                if (hasPermission('canToggleRotation')) {
-                  const success = toggleRotation(face);
-                  if (success) {
-                    // Force re-render by updating a dummy state
-                    setSolverInfo(prev => ({ ...prev }));
-                  }
-                } else {
-                  alert('Permission denied: You do not have permission to toggle rotation settings.');
-                }
-              }}>
-                Enable
-              </EnableButton>
-            </DisabledRotation>
-          ))}
-          {getDisabledRotations().some(r => r.reason) && (
-            <div style={{ fontSize: '10px', color: '#ccc', marginTop: '4px' }}>
-              * {getDisabledRotations().find(r => r.reason)?.reason}
-            </div>
-          )}
-        </AdminPanel>
-      )}
     </ControlsContainer>
   );
 }
