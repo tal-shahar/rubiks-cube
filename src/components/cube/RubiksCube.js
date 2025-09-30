@@ -150,8 +150,8 @@ export function RubiksCube({
               return seed / 233280;
             };
             
-            // Generate 20 random moves using the seeded generator
-            for (let i = 0; i < 20; i++) {
+            // Generate 30 random moves using the seeded generator
+            for (let i = 0; i < 30; i++) {
               const move = moves[Math.floor(seededRandom() * moves.length)];
               const direction = directions[Math.floor(seededRandom() * directions.length)];
               scrambleSequence.push({ face: move, direction });
@@ -311,10 +311,18 @@ export function RubiksCube({
               console.log(`🎯 LEFT CUBE SIMPLE SOLVE: Reversing ${moveHistory.length} moves`);
               console.log('🔄 Left cube sequence:', solveSequence.map(m => `${m.face} ${m.direction}`));
               
+              // Track performance for Simple Reverse
+              const simpleStartTime = performance.now();
+              console.log(`⏱️ Simple Reverse started at ${simpleStartTime.toFixed(2)}ms`);
+              
               enhancedExecuteSolveWithAnimation(solveSequence, () => {
+                const simpleEndTime = performance.now();
+                const simpleTotalTime = simpleEndTime - simpleStartTime;
+                
                 setMoveHistory([]);
                 setIsAnimating(false);
-                console.log('✅ LEFT CUBE SOLVED WITH SIMPLE METHOD!');
+                console.log(`✅ LEFT CUBE SOLVED WITH SIMPLE METHOD!`);
+                console.log(`⏱️ Simple Reverse completed in ${simpleTotalTime.toFixed(2)}ms with ${solveSequence.length} moves`);
                 
                 // Notify parent component of cleared move history
                 if (onMoveHistoryChange) {
@@ -327,11 +335,37 @@ export function RubiksCube({
             console.log('🧩 RIGHT CUBE ADVANCED SOLVER: Starting solve...');
             
             // Use advanced solver to analyze and solve the cube
-            const solverResult = advancedSolver.solve(cubeState);
+            // Pass both cube state and move history for proper solving
+            const solverResult = advancedSolver.solve(cubeState, moveHistory);
             
             if (solverResult.success) {
               console.log(`✅ Advanced solver found solution: ${solverResult.moves} moves using ${solverResult.method}`);
               console.log('📝 Solution:', solverResult.solution);
+              
+              // Log performance comparison data
+              if (solverResult.performance) {
+                console.log('📊 PERFORMANCE COMPARISON:');
+                console.log(`⏱️ Simple Reverse: ${solverResult.performance.simpleReverse.moves} moves in ${solverResult.performance.simpleReverse.time.toFixed(2)}ms`);
+                if (solverResult.performance.advanced) {
+                  console.log(`⏱️ Advanced Algorithm: ${solverResult.performance.advanced.moves} moves in ${solverResult.performance.advanced.time.toFixed(2)}ms`);
+                }
+                console.log(`🏆 Winner: ${solverResult.performance.comparison}`);
+                
+                // Calculate efficiency comparison
+                const simpleMoves = solverResult.performance.simpleReverse.moves;
+                const advancedMoves = solverResult.performance.advanced ? solverResult.performance.advanced.moves : simpleMoves;
+                const efficiency = ((simpleMoves - advancedMoves) / simpleMoves * 100).toFixed(1);
+                
+                if (solverResult.performance.advanced) {
+                  if (advancedMoves < simpleMoves) {
+                    console.log(`🚀 Advanced is ${efficiency}% more efficient!`);
+                  } else if (advancedMoves > simpleMoves) {
+                    console.log(`⚠️ Advanced is ${Math.abs(efficiency)}% less efficient!`);
+                  } else {
+                    console.log(`🤝 Both methods are equally efficient`);
+                  }
+                }
+              }
               
               if (solverResult.solution.length === 0) {
                 console.log('🎯 Cube is already solved!');

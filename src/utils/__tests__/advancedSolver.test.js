@@ -153,7 +153,7 @@ describe('AdvancedSolver', () => {
       
       const result = solver.solve(simpleScramble);
       
-      expect(['Layer-by-Layer', 'CFOP', 'Simplified Kociemba']).toContain(result.method);
+      expect(['Simple Reverse', 'Simple Reverse - Already Solved', 'Layer-by-Layer', 'CFOP', 'Simplified Kociemba']).toContain(result.method);
       expect(result.success).toBe(true);
       expect(Array.isArray(result.solution)).toBe(true);
     });

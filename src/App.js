@@ -76,8 +76,9 @@ const DualCubeContainer = styled.div`
   display: flex;
   gap: 20px;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   margin: 20px 0;
+  width: 100%;
   
   @media (max-width: 768px) {
     display: flex;
@@ -96,13 +97,20 @@ const CubeWrapper = styled.div`
   align-items: center;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 15px;
+  padding: 30px;
   border: 2px solid rgba(255, 255, 255, 0.2);
+  width: 100%;
+  max-width: 600px;
   
   @media (max-width: 768px) {
     width: 100%;
-    max-width: 350px;
+    max-width: 450px;
     margin: 0 auto;
+    padding: 20px;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: 350px;
     padding: 15px;
   }
 `;
@@ -115,19 +123,18 @@ const CubeTitle = styled.h3`
 `;
 
 const CubeCanvas = styled.div`
-  width: 300px;
-  height: 300px;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
   
   @media (max-width: 768px) {
-    width: 280px;
-    height: 280px;
+    max-width: 400px;
   }
   
   @media (max-width: 480px) {
-    width: 250px;
-    height: 250px;
+    max-width: 300px;
   }
 `;
 
@@ -274,13 +281,25 @@ function App() {
     }
   }, [cubeIsAnimating]);
 
-  const handleRotateFace = (face, direction, cubeId = 'left') => {
-    const rotateFaceRef = cubeId === 'left' ? leftRotateFaceRef : rightRotateFaceRef;
-    if (rotateFaceRef.current) {
-      try {
-        rotateFaceRef.current(face, direction);
-      } catch (error) {
-        // Silently handle errors in production
+  const handleRotateFace = (face, direction, cubeId = 'both') => {
+    // Rotate both cubes simultaneously by default
+    if (cubeId === 'both' || cubeId === 'left') {
+      if (leftRotateFaceRef.current) {
+        try {
+          leftRotateFaceRef.current(face, direction);
+        } catch (error) {
+          // Silently handle errors in production
+        }
+      }
+    }
+    
+    if (cubeId === 'both' || cubeId === 'right') {
+      if (rightRotateFaceRef.current) {
+        try {
+          rightRotateFaceRef.current(face, direction);
+        } catch (error) {
+          // Silently handle errors in production
+        }
       }
     }
   };
@@ -308,7 +327,6 @@ function App() {
       <MainContent>
         <DualCubeContainer>
           <CubeWrapper>
-            <CubeTitle>Simple Revert Solver</CubeTitle>
             <CubeCanvas>
               <CubeContainer>
                 <RubiksCube 
@@ -324,28 +342,6 @@ function App() {
                   onAnimationStateChange={setCubeIsAnimating}
                   cubeId="left"
                   onMoveHistoryChange={setLeftMoveHistory}
-                />
-              </CubeContainer>
-            </CubeCanvas>
-          </CubeWrapper>
-          
-          <CubeWrapper>
-            <CubeTitle>Advanced Kociemba Solver</CubeTitle>
-            <CubeCanvas>
-              <CubeContainer>
-                <RubiksCube 
-                  isRotating={isRotating}
-                  autoRotate={autoRotate}
-                  onScramble={(scrambleFn) => { rightScrambleRef.current = scrambleFn; }}
-                  onReset={(resetFn) => { rightResetRef.current = resetFn; }}
-                  onSolveRef={rightSolveRef}
-                  onRotateFace={(rotateFaceFn) => { rightRotateFaceRef.current = rotateFaceFn; }}
-                  onCameraReset={(cameraResetFn) => { rightCameraResetRef.current = cameraResetFn; }}
-                  onGroupRef={(groupRefFn) => { rightGroupRef.current = groupRefFn; }}
-                  onCubeStateChange={setRightCubeState}
-                  onAnimationStateChange={setCubeIsAnimating}
-                  cubeId="right"
-                  onMoveHistoryChange={setRightMoveHistory}
                 />
               </CubeContainer>
             </CubeCanvas>

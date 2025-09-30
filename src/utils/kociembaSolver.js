@@ -163,7 +163,7 @@ class CubeState {
   /**
    * Get a scramble sequence
    */
-  scramble(length = 25) {
+  scramble(length = 30) {
     const faces = Object.values(FACES);
     const directions = ['', "'", '2'];
     const moves = [];
@@ -446,7 +446,7 @@ export class AdvancedSolver {
   /**
    * Scramble the cube
    */
-  scramble(length = 25) {
+  scramble(length = 30) {
     console.log(`🔀 Scrambling cube with ${length} moves...`);
     const scramble = this.cubeState.scramble(length);
     console.log(`📝 Scramble: ${scramble.join(' ')}`);
