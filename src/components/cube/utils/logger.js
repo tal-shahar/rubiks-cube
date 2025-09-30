@@ -10,6 +10,9 @@ export const setTestMode = (enabled) => {
   testMode = enabled;
 };
 
+// Environment detection - only use localhost endpoints in development
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // Special logging function for rotation tracking
 export const logRotationStep = (step, face, direction, data = null) => {
   const timestamp = new Date().toLocaleTimeString();
@@ -51,7 +54,12 @@ export const logToTerminal = (message, data = null, type = 'INFO') => {
   // console.log('='.repeat(80) + '\n');
   
   // Try to send to log server, but don't fail if it's not available
+  // Only attempt this in development mode
   const sendToLogServer = async () => {
+    if (!isDevelopment) {
+      return; // Skip localhost logging in production
+    }
+    
     try {
       const response = await fetch('http://localhost:3001/log', {
         method: 'POST',
@@ -77,7 +85,12 @@ export const logToTerminal = (message, data = null, type = 'INFO') => {
   };
   
   // Try to write to local file, but don't fail if it's not available
+  // Only attempt this in development mode
   const writeToFile = async () => {
+    if (!isDevelopment) {
+      return; // Skip localhost logging in production
+    }
+    
     try {
       const fileLogLine = `[${timestamp}] ${type}: ${message}${data ? ' | Data: ' + JSON.stringify(data) : ''}\n`;
       await fetch('http://localhost:3001/write-log', {
