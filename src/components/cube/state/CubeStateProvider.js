@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { logToTerminal } from '../utils/logger';
 import { getOriginalPosition, getOriginalColors, getStartingPositionColors } from '../utils/colors';
-import { useWebGLLoading } from '../../hooks/useWebGLLoading';
+import { useWebGLLoading } from '../../../hooks/useWebGLLoading';
 
 // Factory function to create independent state managers for each cube instance
 function createCubeStateManager(cubeId = 'unknown') {
