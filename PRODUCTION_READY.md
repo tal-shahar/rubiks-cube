@@ -16,14 +16,14 @@
 - [x] **Bundle size optimized** - Main bundle: 297.07 kB (gzipped)
 
 ### Deployment Infrastructure
-- [x] **AWS S3 deployment** - Ready for S3 static hosting
-- [x] **CloudFront CDN** - CDN invalidation configured
+- [x] **Hostinger FTP/FTPS** - Upload `build/` to `public_html`
 - [x] **GitHub Actions CI/CD** - Automated testing and deployment
+- [x] **Apache `.htaccess`** - Caching and SPA fallback on Hostinger
 - [x] **Environment configuration** - Production configs separated
 
 ### Security & Performance
-- [x] **HTTPS ready** - Secure deployment configuration
-- [x] **Caching headers** - Optimized cache control for static assets
+- [x] **HTTPS ready** - Hostinger SSL (Let's Encrypt) in hPanel
+- [x] **Caching headers** - `.htaccess` cache rules for static assets
 - [x] **Service worker** - PWA capabilities with version management
 - [x] **Responsive design** - Mobile and desktop optimized
 
@@ -38,18 +38,20 @@ git push origin main
 ```
 
 **Required GitHub Secrets:**
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_S3_BUCKET_NAME`
-- `CLOUDFRONT_DISTRIBUTION_ID`
+- `HOSTINGER_FTP_SERVER`
+- `HOSTINGER_FTP_USERNAME`
+- `HOSTINGER_FTP_PASSWORD`
+- `HOSTINGER_FTP_REMOTE_DIR`
+
+See [HOSTINGER_DEPLOYMENT_GUIDE.md](HOSTINGER_DEPLOYMENT_GUIDE.md).
 
 ### Option 2: Manual Production Deployment
 ```bash
 # Run comprehensive production deployment
 npm run deploy:prod
 
-# Deploy to S3 (requires AWS credentials)
-npm run deploy:s3
+# Deploy to Hostinger (requires FTP env vars)
+npm run deploy:hostinger
 
 # Test locally
 npm run serve
@@ -61,8 +63,8 @@ npm run serve
 npm run build
 npm test
 
-# Deploy to S3
-npm run deploy:s3
+# Deploy to Hostinger
+npm run deploy:hostinger
 ```
 
 ## 📊 Production Metrics
@@ -88,10 +90,11 @@ npm run deploy:s3
 
 ### Environment Variables
 ```bash
-# Required for S3 deployment
-AWS_S3_BUCKET_NAME=your-bucket-name
-AWS_REGION=us-east-1
-CLOUDFRONT_DISTRIBUTION_ID=your-distribution-id
+# Hostinger FTP (local deploy)
+HOSTINGER_FTP_SERVER=ftp.yourdomain.com
+HOSTINGER_FTP_USERNAME=your-ftp-user
+HOSTINGER_FTP_PASSWORD=your-ftp-password
+HOSTINGER_FTP_REMOTE_DIR=/public_html/
 
 # Optional performance settings
 GENERATE_SOURCEMAP=false
@@ -104,16 +107,12 @@ INLINE_RUNTIME_CHUNK=false
 - **Source maps**: Disabled for production
 - **Runtime chunk**: Inline runtime chunk disabled
 
-## 🌐 Deployment URLs
+## 🌐 Deployment URL
 
-### S3 Website
-```
-https://your-bucket-name.s3-website-us-east-1.amazonaws.com
-```
+Your live site is your Hostinger domain, e.g.:
 
-### CloudFront CDN
 ```
-https://your-distribution-id.cloudfront.net
+https://yourdomain.com
 ```
 
 ## 📱 Features Ready for Production
@@ -152,18 +151,18 @@ https://your-distribution-id.cloudfront.net
 2. **Testing**: Run `npm test` to verify changes
 3. **Build**: Run `npm run build` to test production build
 4. **Deploy**: Push to main branch for automatic deployment
-5. **Verify**: Check deployed application functionality
+5. **Verify**: Check your domain on Hostinger
 
 ## 🚨 Troubleshooting
 
 ### Common Issues
 1. **Build failures**: Check Node.js version (18+ required)
 2. **Test failures**: Run `npm test` to identify issues
-3. **Deployment errors**: Verify AWS credentials and permissions
+3. **Deployment errors**: Verify Hostinger FTP secrets and `public_html` path
 4. **Performance issues**: Check browser console for errors
 
 ### Support
-- **Documentation**: See README.md for detailed usage
+- **Documentation**: See README.md and HOSTINGER_DEPLOYMENT_GUIDE.md
 - **Issues**: Check GitHub issues for known problems
 - **Testing**: Use `npm run serve` for local testing
 
@@ -172,15 +171,14 @@ https://your-distribution-id.cloudfront.net
 Your Rubik's Cube application is fully production-ready with:
 - ✅ Comprehensive testing
 - ✅ Optimized build process
-- ✅ Automated deployment
+- ✅ Automated deployment to Hostinger
 - ✅ Performance optimizations
 - ✅ Error handling
 - ✅ Modern UI/UX
 
 **Next Steps:**
-1. Set up AWS credentials in GitHub Secrets
-2. Configure your S3 bucket and CloudFront distribution
-3. Push to main branch to trigger deployment
-4. Monitor the deployed application
+1. Add Hostinger FTP secrets in GitHub (see HOSTINGER_DEPLOYMENT_GUIDE.md)
+2. Push to main branch to trigger deployment
+3. Verify the site at your domain
 
 **Happy cubing! 🧩**

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { RubiksCube } from './components/cube';
+import RubiksCube from './components/RubiksCube';
 import Controls from './components/Controls';
 import InfoPanel from './components/InfoPanel';
 import KeybindingModal from './components/KeybindingModal';
@@ -327,6 +327,7 @@ function App() {
       <MainContent>
         <DualCubeContainer>
           <CubeWrapper>
+            <CubeTitle>Interactive Cube</CubeTitle>
             <CubeCanvas>
               <CubeContainer>
                 <RubiksCube 

@@ -91,15 +91,19 @@ try {
   console.log('📁 Build files are in the "build" directory');
   console.log('\n🌐 Deployment Options:');
   console.log('1. Local testing: npm run serve');
-  console.log('2. AWS S3: npm run deploy:s3');
-  console.log('3. Manual upload: Upload build/ folder to your hosting provider');
+  console.log('2. Hostinger FTP: npm run deploy:hostinger');
+  console.log('3. Manual upload: Upload build/ contents to public_html in hPanel');
 
-  // Step 9: Check if AWS credentials are available for deployment
-  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-    console.log('\n🔑 AWS credentials detected. Ready for S3 deployment.');
-    console.log('Run: npm run deploy:s3');
+  if (
+    process.env.HOSTINGER_FTP_SERVER &&
+    process.env.HOSTINGER_FTP_USERNAME &&
+    process.env.HOSTINGER_FTP_PASSWORD
+  ) {
+    console.log('\n🔑 Hostinger FTP credentials detected. Ready to deploy.');
+    console.log('Run: npm run deploy:hostinger');
   } else {
-    console.log('\n⚠️  AWS credentials not found. Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY for S3 deployment.');
+    console.log('\n⚠️  Set HOSTINGER_FTP_SERVER, HOSTINGER_FTP_USERNAME, and HOSTINGER_FTP_PASSWORD for FTP deploy.');
+    console.log('   See HOSTINGER_DEPLOYMENT_GUIDE.md for GitHub Actions secrets.');
   }
 
 } catch (error) {

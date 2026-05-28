@@ -3,6 +3,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { CubeStateProvider } from './cube/state/CubeStateProvider';
 import { RubiksCube as ModularRubiksCube } from './cube/RubiksCube';
+import LoadingSpinner from './LoadingSpinner';
 
 // Camera reset component
 const CameraReset = ({ onCameraReset }) => {
@@ -56,7 +57,12 @@ export function RubiksCubeWrapper({ isRotating, autoRotate = false, onScramble, 
   
   return (
     <CubeStateProvider onCubeStateChange={onCubeStateChange}>
-      {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated }) => {
+      {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated, isLoading }) => {
+        
+        // Show loading spinner while WebGL is loading
+        if (isLoading) {
+          return <LoadingSpinner message="Loading WebGL..." />;
+        }
         
         // Expose functions to parent component
         useEffect(() => {

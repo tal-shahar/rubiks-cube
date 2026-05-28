@@ -21,7 +21,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 - ✅ **Test Coverage**: 128/128 tests passing (100% success rate)
 - ✅ **Build Optimized**: 297.16 kB gzipped bundle size
 - ✅ **Performance**: 60fps smooth animations with WebGL acceleration
-- ✅ **Deployment Ready**: AWS S3 + CloudFront configuration included
+- ✅ **Deployment Ready**: Hostinger FTP/FTPS + GitHub Actions configuration included
 
 ## Features
 
@@ -84,10 +84,9 @@ npm start
 - `npm test` - Run tests with coverage
 - `npm run serve` - Serve production build locally
 - `npm run dev` - Start with logging server (for debugging)
-- `npm run deploy` - Deploy to production (AWS S3 + CloudFront)
-- `npm run deploy:prod` - Full production deployment
-- `npm run deploy:s3` - Deploy to S3 only
-- `npm run invalidate-cache` - Invalidate CloudFront cache
+- `npm run deploy` - Build for production
+- `npm run deploy:prod` - Full production build (test + build)
+- `npm run deploy:hostinger` - Upload build/ to Hostinger via FTP
 
 ### Building for Production
 
@@ -101,13 +100,15 @@ The build artifacts will be stored in the `build/` directory.
 
 ### Option 1: Automated GitHub Actions (Recommended)
 
-The project includes GitHub Actions workflow for automated deployment to AWS S3 + CloudFront.
+The project includes a GitHub Actions workflow for automated deployment to Hostinger via FTPS.
 
 **Required GitHub Secrets:**
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_S3_BUCKET_NAME`
-- `CLOUDFRONT_DISTRIBUTION_ID`
+- `HOSTINGER_FTP_SERVER`
+- `HOSTINGER_FTP_USERNAME`
+- `HOSTINGER_FTP_PASSWORD`
+- `HOSTINGER_FTP_REMOTE_DIR` (e.g. `/public_html/`)
+
+See [HOSTINGER_DEPLOYMENT_GUIDE.md](HOSTINGER_DEPLOYMENT_GUIDE.md) for setup steps.
 
 **Deploy:**
 ```bash
@@ -122,8 +123,8 @@ git push origin main
 # Full production deployment
 npm run deploy:prod
 
-# Deploy to S3 only
-npm run deploy:s3
+# Deploy to Hostinger (requires FTP env vars)
+npm run deploy:hostinger
 
 # Test locally
 npm run serve
@@ -141,10 +142,11 @@ npm run build
 Create a `.env` file for deployment configuration:
 
 ```bash
-# AWS Configuration
-AWS_S3_BUCKET_NAME=your-bucket-name
-AWS_REGION=us-east-1
-CLOUDFRONT_DISTRIBUTION_ID=your-distribution-id
+# Hostinger FTP (local deploy only; use GitHub Secrets for CI)
+HOSTINGER_FTP_SERVER=ftp.yourdomain.com
+HOSTINGER_FTP_USERNAME=your-ftp-user
+HOSTINGER_FTP_PASSWORD=your-ftp-password
+HOSTINGER_FTP_REMOTE_DIR=/public_html/
 
 # Optional Performance Settings
 GENERATE_SOURCEMAP=false
@@ -478,7 +480,7 @@ npm test -- --watch
 - **WebGL community** for hardware-accelerated 3D rendering
 - **React community** for the modern component-based architecture
 - **Jest & React Testing Library** for comprehensive testing framework
-- **AWS** for production deployment infrastructure
+- **Hostinger** for production web hosting
 
 ## License
 
@@ -494,7 +496,7 @@ This Rubik's Cube application is **production ready** with:
 - ✅ Performance optimizations (60fps animations)
 - ✅ Error handling and graceful degradation
 - ✅ Modern UI/UX with responsive design
-- ✅ Deployment automation (AWS S3 + CloudFront)
+- ✅ Deployment automation (Hostinger FTPS via GitHub Actions)
 - ✅ Complete documentation and setup guides
 
 **Made with ❤️ using React, Three.js, and WebGL** 

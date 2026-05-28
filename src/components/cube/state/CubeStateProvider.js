@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { logToTerminal } from '../utils/logger';
 import { getOriginalPosition, getOriginalColors, getStartingPositionColors } from '../utils/colors';
+import { useWebGLLoading } from '../../hooks/useWebGLLoading';
 
 // Factory function to create independent state managers for each cube instance
 function createCubeStateManager(cubeId = 'unknown') {
@@ -135,6 +136,7 @@ if (typeof window !== 'undefined') {
 // Simple React component that uses its own independent state manager
 export function CubeStateProvider({ children, onCubeStateChange, cubeId }) {
   const [forceUpdate, setForceUpdate] = useState(0);
+  const { isWebGLReady, isLoading } = useWebGLLoading();
   
   // Create an independent state manager for this cube instance
   const cubeStateManager = useMemo(() => {
@@ -171,6 +173,13 @@ export function CubeStateProvider({ children, onCubeStateChange, cubeId }) {
       
       return state;
     }, [forceUpdate, cubeStateManager]);
+
+  // Log WebGL loading status
+  useEffect(() => {
+    if (isWebGLReady) {
+      console.log('✅ WebGL is ready, cube can render');
+    }
+  }, [isWebGLReady]);
 
   // Function to update cube state
   const setCubeState = useCallback((newState) => {
@@ -231,7 +240,8 @@ export function CubeStateProvider({ children, onCubeStateChange, cubeId }) {
     setMoveHistory,
     hasRotated,
     setHasRotated,
-    cubeStateManager
+    cubeStateManager,
+    isLoading
   });
 }
 

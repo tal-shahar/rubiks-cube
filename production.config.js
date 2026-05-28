@@ -9,10 +9,9 @@ module.exports = {
   GENERATE_SOURCEMAP: false,
   INLINE_RUNTIME_CHUNK: false,
   
-  // AWS Configuration (set these in your deployment environment)
-  AWS_S3_BUCKET_NAME: process.env.AWS_S3_BUCKET_NAME || 'rubiks-cube-site',
-  AWS_REGION: process.env.AWS_REGION || 'us-east-1',
-  CLOUDFRONT_DISTRIBUTION_ID: process.env.CLOUDFRONT_DISTRIBUTION_ID || '',
+  // Hostinger FTP (set in environment or GitHub Actions secrets)
+  HOSTINGER_FTP_SERVER: process.env.HOSTINGER_FTP_SERVER || '',
+  HOSTINGER_FTP_REMOTE_DIR: process.env.HOSTINGER_FTP_REMOTE_DIR || '/public_html/',
   
   // Build optimizations
   BUILD_OPTIMIZE: true,

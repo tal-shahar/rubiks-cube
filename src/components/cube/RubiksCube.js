@@ -7,6 +7,7 @@ import { useRotation } from './hooks/useRotation';
 import { getOriginalColors, getStartingPositionColors } from './utils/colors';
 import { getScrambleRotations } from '../../utils/rotationConfig';
 import { advancedSolver } from '../../utils/advancedSolver';
+import LoadingSpinner from '../LoadingSpinner';
 
 // Camera reset component
 const CameraReset = ({ onCameraReset }) => {
@@ -74,7 +75,12 @@ export function RubiksCube({
       <pointLight position={[-10, -10, -5]} intensity={0.5} />
       
       <CubeStateProvider onCubeStateChange={onCubeStateChange} cubeId={cubeId}>
-        {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated, cubeStateManager }) => {
+        {({ cubeState, isAnimating, rotatingFace, rotationProgress, setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, moveHistory, setMoveHistory, hasRotated, setHasRotated, cubeStateManager, isLoading }) => {
+          
+          // Show loading spinner while WebGL is loading
+          if (isLoading) {
+            return <LoadingSpinner message="Loading WebGL..." />;
+          }
           const rotationHook = useRotation(setCubeState, setIsAnimating, setRotatingFace, setRotationProgress, setMoveHistory, setHasRotated, cubeStateManager);
           
           // Notify parent component when animation state changes
