@@ -97,7 +97,7 @@ If assets fail to load, confirm files sit directly under `public_html` (e.g. `pu
 | FTP login failed | Username, password, hostname; try FTPS (`HOSTINGER_FTP_SECURE=true` locally) |
 | Empty or wrong site | `HOSTINGER_FTP_REMOTE_DIR` must match hPanel’s document root |
 | 403 / 404 on refresh | `public/.htaccess` is copied into `build/` on build; rebuild and redeploy |
-| GitHub Action deploy fails | Secrets spelled exactly as above; port `21` for FTPS |
+| GitHub Action deploy fails | Secrets spelled exactly as above; `HOSTINGER_FTP_REMOTE_DIR` must end with `/` (e.g. `/public_html/`); workflow uses FTPS on port `21` with a 5-minute timeout |
 
 ## Removing old AWS setup
 
