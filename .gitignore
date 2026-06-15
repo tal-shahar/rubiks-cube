@@ -53,6 +53,10 @@ cypress/screenshots/
 *.tmp
 *.temp
 
+# === Documentation (keep only README in repo) ===
+*.md
+!README.md
+
 
 # ====== CLIENT (React frontend) ======
 client/node_modules/
