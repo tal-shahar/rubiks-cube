@@ -62,10 +62,10 @@ describe('Rotation Logic', () => {
     });
 
     describe('Front face rotation (F)', () => {
-      it('should rotate front face pieces clockwise correctly', () => {
+      it('should rotate front face pieces counterclockwise correctly', () => {
         const originalPositions = mockPieces.map(p => [...p.position]);
         
-        applyRotation(mockPieces, 'F', 'clockwise');
+        applyRotation(mockPieces, 'F', 'counterclockwise');
         
         // Front face pieces should be rotated
         expect(mockPieces[0].position).toEqual([-1, 1, 1]); // [1,1,1] -> [-1,1,1]
@@ -84,14 +84,14 @@ describe('Rotation Logic', () => {
         mockPieces.slice(0, 3).forEach(piece => {
           expect(piece.rotationHistory).toHaveLength(1);
           expect(piece.rotationHistory[0].face).toBe('F');
-          expect(piece.rotationHistory[0].direction).toBe('clockwise');
+          expect(piece.rotationHistory[0].direction).toBe('counterclockwise');
         });
       });
 
-      it('should rotate front face pieces counterclockwise correctly', () => {
-        applyRotation(mockPieces, 'F', 'counterclockwise');
+      it('should rotate front face pieces clockwise correctly', () => {
+        applyRotation(mockPieces, 'F', 'clockwise');
         
-        // Front face pieces should be rotated counterclockwise
+        // Front face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([1, -1, 1]); // [1,1,1] -> [1,-1,1]
         expect(mockPieces[1].position).toEqualPosition([1, 0, 1]); // [0,1,1] -> [1,0,1]
         expect(mockPieces[2].position).toEqualPosition([1, 1, 1]); // [-1,1,1] -> [1,1,1]
@@ -102,20 +102,6 @@ describe('Rotation Logic', () => {
     });
 
     describe('Back face rotation (B)', () => {
-      it('should rotate back face pieces clockwise correctly', () => {
-        // Move pieces to back face
-        mockPieces[0].position = [1, 1, -1];
-        mockPieces[1].position = [0, 1, -1];
-        mockPieces[2].position = [-1, 1, -1];
-        
-        applyRotation(mockPieces, 'B', 'clockwise');
-        
-        // Back face pieces should be rotated
-        expect(mockPieces[0].position).toEqualPosition([1, -1, -1]); // [1,1,-1] -> [1,-1,-1]
-        expect(mockPieces[1].position).toEqualPosition([1, 0, -1]); // [0,1,-1] -> [1,0,-1]
-        expect(mockPieces[2].position).toEqualPosition([1, 1, -1]); // [-1,1,-1] -> [1,1,-1]
-      });
-
       it('should rotate back face pieces counterclockwise correctly', () => {
         // Move pieces to back face
         mockPieces[0].position = [1, 1, -1];
@@ -124,7 +110,21 @@ describe('Rotation Logic', () => {
         
         applyRotation(mockPieces, 'B', 'counterclockwise');
         
-        // Back face pieces should be rotated counterclockwise
+        // Back face pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([1, -1, -1]); // [1,1,-1] -> [1,-1,-1]
+        expect(mockPieces[1].position).toEqualPosition([1, 0, -1]); // [0,1,-1] -> [1,0,-1]
+        expect(mockPieces[2].position).toEqualPosition([1, 1, -1]); // [-1,1,-1] -> [1,1,-1]
+      });
+
+      it('should rotate back face pieces clockwise correctly', () => {
+        // Move pieces to back face
+        mockPieces[0].position = [1, 1, -1];
+        mockPieces[1].position = [0, 1, -1];
+        mockPieces[2].position = [-1, 1, -1];
+        
+        applyRotation(mockPieces, 'B', 'clockwise');
+        
+        // Back face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqual([-1, 1, -1]); // [1,1,-1] -> [-1,1,-1]
         expect(mockPieces[1].position).toEqual([-1, 0, -1]); // [0,1,-1] -> [-1,0,-1]
         expect(mockPieces[2].position).toEqual([-1, -1, -1]); // [-1,1,-1] -> [-1,-1,-1]
@@ -132,20 +132,6 @@ describe('Rotation Logic', () => {
     });
 
     describe('Right face rotation (R)', () => {
-      it('should rotate right face pieces clockwise correctly', () => {
-        // Move pieces to right face
-        mockPieces[0].position = [1, 1, 1];
-        mockPieces[1].position = [1, 0, 1];
-        mockPieces[2].position = [1, -1, 1];
-        
-        applyRotation(mockPieces, 'R', 'clockwise');
-        
-        // Right face pieces should be rotated
-        expect(mockPieces[0].position).toEqualPosition([1, -1, 1]); // [1,1,1] -> [1,-1,1]
-        expect(mockPieces[1].position).toEqualPosition([1, -1, 0]); // [1,0,1] -> [1,-1,0]
-        expect(mockPieces[2].position).toEqualPosition([1, -1, -1]); // [1,-1,1] -> [1,-1,-1]
-      });
-
       it('should rotate right face pieces counterclockwise correctly', () => {
         // Move pieces to right face
         mockPieces[0].position = [1, 1, 1];
@@ -154,7 +140,21 @@ describe('Rotation Logic', () => {
         
         applyRotation(mockPieces, 'R', 'counterclockwise');
         
-        // Right face pieces should be rotated counterclockwise
+        // Right face pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([1, -1, 1]); // [1,1,1] -> [1,-1,1]
+        expect(mockPieces[1].position).toEqualPosition([1, -1, 0]); // [1,0,1] -> [1,-1,0]
+        expect(mockPieces[2].position).toEqualPosition([1, -1, -1]); // [1,-1,1] -> [1,-1,-1]
+      });
+
+      it('should rotate right face pieces clockwise correctly', () => {
+        // Move pieces to right face
+        mockPieces[0].position = [1, 1, 1];
+        mockPieces[1].position = [1, 0, 1];
+        mockPieces[2].position = [1, -1, 1];
+        
+        applyRotation(mockPieces, 'R', 'clockwise');
+        
+        // Right face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([1, 1, -1]); // [1,1,1] -> [1,1,-1]
         expect(mockPieces[1].position).toEqualPosition([1, 1, 0]); // [1,0,1] -> [1,1,0]
         expect(mockPieces[2].position).toEqualPosition([1, 1, 1]); // [1,-1,1] -> [1,1,1]
@@ -162,20 +162,6 @@ describe('Rotation Logic', () => {
     });
 
     describe('Left face rotation (L)', () => {
-      it('should rotate left face pieces clockwise correctly', () => {
-        // Move pieces to left face
-        mockPieces[0].position = [-1, 1, 1];
-        mockPieces[1].position = [-1, 0, 1];
-        mockPieces[2].position = [-1, -1, 1];
-        
-        applyRotation(mockPieces, 'L', 'clockwise');
-        
-        // Left face pieces should be rotated
-        expect(mockPieces[0].position).toEqualPosition([-1, 1, -1]); // [-1,1,1] -> [-1,1,-1]
-        expect(mockPieces[1].position).toEqualPosition([-1, 1, 0]); // [-1,0,1] -> [-1,1,0]
-        expect(mockPieces[2].position).toEqualPosition([-1, 1, 1]); // [-1,-1,1] -> [-1,1,1]
-      });
-
       it('should rotate left face pieces counterclockwise correctly', () => {
         // Move pieces to left face
         mockPieces[0].position = [-1, 1, 1];
@@ -184,7 +170,21 @@ describe('Rotation Logic', () => {
         
         applyRotation(mockPieces, 'L', 'counterclockwise');
         
-        // Left face pieces should be rotated counterclockwise
+        // Left face pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([-1, 1, -1]); // [-1,1,1] -> [-1,1,-1]
+        expect(mockPieces[1].position).toEqualPosition([-1, 1, 0]); // [-1,0,1] -> [-1,1,0]
+        expect(mockPieces[2].position).toEqualPosition([-1, 1, 1]); // [-1,-1,1] -> [-1,1,1]
+      });
+
+      it('should rotate left face pieces clockwise correctly', () => {
+        // Move pieces to left face
+        mockPieces[0].position = [-1, 1, 1];
+        mockPieces[1].position = [-1, 0, 1];
+        mockPieces[2].position = [-1, -1, 1];
+        
+        applyRotation(mockPieces, 'L', 'clockwise');
+        
+        // Left face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([-1, -1, 1]); // [-1,1,1] -> [-1,-1,1]
         expect(mockPieces[1].position).toEqualPosition([-1, -1, 0]); // [-1,0,1] -> [-1,-1,0]
         expect(mockPieces[2].position).toEqualPosition([-1, -1, -1]); // [-1,-1,1] -> [-1,-1,-1]
@@ -192,20 +192,6 @@ describe('Rotation Logic', () => {
     });
 
     describe('Up face rotation (U)', () => {
-      it('should rotate up face pieces clockwise correctly', () => {
-        // Move pieces to up face
-        mockPieces[0].position = [1, 1, 1];
-        mockPieces[1].position = [0, 1, 1];
-        mockPieces[2].position = [-1, 1, 1];
-        
-        applyRotation(mockPieces, 'U', 'clockwise');
-        
-        // Up face pieces should be rotated
-        expect(mockPieces[0].position).toEqualPosition([1, 1, -1]); // [1,1,1] -> [1,1,-1]
-        expect(mockPieces[1].position).toEqualPosition([1, 1, 0]); // [0,1,1] -> [1,1,0]
-        expect(mockPieces[2].position).toEqualPosition([1, 1, 1]); // [-1,1,1] -> [1,1,1]
-      });
-
       it('should rotate up face pieces counterclockwise correctly', () => {
         // Move pieces to up face
         mockPieces[0].position = [1, 1, 1];
@@ -214,7 +200,21 @@ describe('Rotation Logic', () => {
         
         applyRotation(mockPieces, 'U', 'counterclockwise');
         
-        // Up face pieces should be rotated counterclockwise
+        // Up face pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([1, 1, -1]); // [1,1,1] -> [1,1,-1]
+        expect(mockPieces[1].position).toEqualPosition([1, 1, 0]); // [0,1,1] -> [1,1,0]
+        expect(mockPieces[2].position).toEqualPosition([1, 1, 1]); // [-1,1,1] -> [1,1,1]
+      });
+
+      it('should rotate up face pieces clockwise correctly', () => {
+        // Move pieces to up face
+        mockPieces[0].position = [1, 1, 1];
+        mockPieces[1].position = [0, 1, 1];
+        mockPieces[2].position = [-1, 1, 1];
+        
+        applyRotation(mockPieces, 'U', 'clockwise');
+        
+        // Up face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([-1, 1, 1]); // [1,1,1] -> [-1,1,1]
         expect(mockPieces[1].position).toEqualPosition([-1, 1, 0]); // [0,1,1] -> [-1,1,0]
         expect(mockPieces[2].position).toEqualPosition([-1, 1, -1]); // [-1,1,1] -> [-1,1,-1]
@@ -222,20 +222,6 @@ describe('Rotation Logic', () => {
     });
 
     describe('Down face rotation (D)', () => {
-      it('should rotate down face pieces clockwise correctly', () => {
-        // Move pieces to down face
-        mockPieces[0].position = [1, -1, 1];
-        mockPieces[1].position = [0, -1, 1];
-        mockPieces[2].position = [-1, -1, 1];
-        
-        applyRotation(mockPieces, 'D', 'clockwise');
-        
-        // Down face pieces should be rotated
-        expect(mockPieces[0].position).toEqualPosition([-1, -1, 1]); // [1,-1,1] -> [-1,-1,1]
-        expect(mockPieces[1].position).toEqualPosition([-1, -1, 0]); // [0,-1,1] -> [-1,-1,0]
-        expect(mockPieces[2].position).toEqualPosition([-1, -1, -1]); // [-1,-1,1] -> [-1,-1,-1]
-      });
-
       it('should rotate down face pieces counterclockwise correctly', () => {
         // Move pieces to down face
         mockPieces[0].position = [1, -1, 1];
@@ -244,7 +230,21 @@ describe('Rotation Logic', () => {
         
         applyRotation(mockPieces, 'D', 'counterclockwise');
         
-        // Down face pieces should be rotated counterclockwise
+        // Down face pieces should be rotated
+        expect(mockPieces[0].position).toEqualPosition([-1, -1, 1]); // [1,-1,1] -> [-1,-1,1]
+        expect(mockPieces[1].position).toEqualPosition([-1, -1, 0]); // [0,-1,1] -> [-1,-1,0]
+        expect(mockPieces[2].position).toEqualPosition([-1, -1, -1]); // [-1,-1,1] -> [-1,-1,-1]
+      });
+
+      it('should rotate down face pieces clockwise correctly', () => {
+        // Move pieces to down face
+        mockPieces[0].position = [1, -1, 1];
+        mockPieces[1].position = [0, -1, 1];
+        mockPieces[2].position = [-1, -1, 1];
+        
+        applyRotation(mockPieces, 'D', 'clockwise');
+        
+        // Down face pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([1, -1, -1]); // [1,-1,1] -> [1,-1,-1]
         expect(mockPieces[1].position).toEqualPosition([1, -1, 0]); // [0,-1,1] -> [1,-1,0]
         expect(mockPieces[2].position).toEqualPosition([1, -1, 1]); // [-1,-1,1] -> [1,-1,1]
@@ -254,11 +254,11 @@ describe('Rotation Logic', () => {
     describe('Edge cases', () => {
       it('should handle empty pieces array', () => {
         const emptyPieces = [];
-        expect(() => applyRotation(emptyPieces, 'F', 'clockwise')).not.toThrow();
+        expect(() => applyRotation(emptyPieces, 'F', 'counterclockwise')).not.toThrow();
       });
 
       it('should handle invalid face', () => {
-        expect(() => applyRotation(mockPieces, 'X', 'clockwise')).not.toThrow();
+        expect(() => applyRotation(mockPieces, 'X', 'counterclockwise')).not.toThrow();
         // Pieces should remain unchanged
         expect(mockPieces[0].position).toEqual([1, 1, 1]);
       });
@@ -285,7 +285,7 @@ describe('Rotation Logic', () => {
         
         const originalPosition = [...testPiece.position];
         
-        applyRotation(mockPieces, 'F', 'clockwise');
+        applyRotation(mockPieces, 'F', 'counterclockwise');
         
         // Position should change
         expect(testPiece.position).not.toEqual(originalPosition);
@@ -314,12 +314,12 @@ describe('Rotation Logic', () => {
       it('should update rotation history', () => {
         const initialHistoryLength = mockPieces[0].rotationHistory.length;
         
-        applyRotation(mockPieces, 'F', 'clockwise');
+        applyRotation(mockPieces, 'F', 'counterclockwise');
         
         expect(mockPieces[0].rotationHistory.length).toBe(initialHistoryLength + 1);
         expect(mockPieces[0].rotationHistory[initialHistoryLength]).toEqual({
           face: 'F',
-          direction: 'clockwise',
+          direction: 'counterclockwise',
           fromPosition: [1, 1, 1],
           toPosition: [-1, 1, 1],
           timestamp: expect.any(String)
@@ -328,13 +328,13 @@ describe('Rotation Logic', () => {
     });
 
     describe('Middle layer rotation (M)', () => {
-      it('should rotate middle layer pieces clockwise correctly', () => {
+      it('should rotate middle layer pieces counterclockwise correctly', () => {
         // Move pieces to middle layer (x = 0)
         mockPieces[0].position = [0, 1, 1];
         mockPieces[1].position = [0, 0, 1];
         mockPieces[2].position = [0, -1, 1];
         
-        applyRotation(mockPieces, 'M', 'clockwise');
+        applyRotation(mockPieces, 'M', 'counterclockwise');
         
         // Middle layer pieces should be rotated
         expect(mockPieces[0].position).toEqualPosition([0, -1, 1]); // [0,1,1] -> [0,-1,1]
@@ -345,15 +345,15 @@ describe('Rotation Logic', () => {
         expect(mockPieces[3].position).toEqual([1, 1, -1]);
       });
 
-      it('should rotate middle layer pieces counterclockwise correctly', () => {
+      it('should rotate middle layer pieces clockwise correctly', () => {
         // Move pieces to middle layer (x = 0)
         mockPieces[0].position = [0, 1, 1];
         mockPieces[1].position = [0, 0, 1];
         mockPieces[2].position = [0, -1, 1];
         
-        applyRotation(mockPieces, 'M', 'counterclockwise');
+        applyRotation(mockPieces, 'M', 'clockwise');
         
-        // Middle layer pieces should be rotated counterclockwise
+        // Middle layer pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([0, 1, -1]); // [0,1,1] -> [0,1,-1]
         expect(mockPieces[1].position).toEqualPosition([0, 1, 0]); // [0,0,1] -> [0,1,0]
         expect(mockPieces[2].position).toEqualPosition([0, 1, 1]); // [0,-1,1] -> [0,1,1]
@@ -361,13 +361,13 @@ describe('Rotation Logic', () => {
     });
 
     describe('Equatorial layer rotation (E)', () => {
-      it('should rotate equatorial layer pieces clockwise correctly', () => {
+      it('should rotate equatorial layer pieces counterclockwise correctly', () => {
         // Move pieces to equatorial layer (y = 0)
         mockPieces[0].position = [1, 0, 1];
         mockPieces[1].position = [0, 0, 1];
         mockPieces[2].position = [-1, 0, 1];
         
-        applyRotation(mockPieces, 'E', 'clockwise');
+        applyRotation(mockPieces, 'E', 'counterclockwise');
         
         // Equatorial layer pieces should be rotated
         expect(mockPieces[0].position).toEqualPosition([1, 0, -1]); // [1,0,1] -> [1,0,-1]
@@ -378,15 +378,15 @@ describe('Rotation Logic', () => {
         expect(mockPieces[3].position).toEqual([1, 1, -1]);
       });
 
-      it('should rotate equatorial layer pieces counterclockwise correctly', () => {
+      it('should rotate equatorial layer pieces clockwise correctly', () => {
         // Move pieces to equatorial layer (y = 0)
         mockPieces[0].position = [1, 0, 1];
         mockPieces[1].position = [0, 0, 1];
         mockPieces[2].position = [-1, 0, 1];
         
-        applyRotation(mockPieces, 'E', 'counterclockwise');
+        applyRotation(mockPieces, 'E', 'clockwise');
         
-        // Equatorial layer pieces should be rotated counterclockwise
+        // Equatorial layer pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([-1, 0, 1]); // [1,0,1] -> [-1,0,1]
         expect(mockPieces[1].position).toEqualPosition([-1, 0, 0]); // [0,0,1] -> [-1,0,0]
         expect(mockPieces[2].position).toEqualPosition([-1, 0, -1]); // [-1,0,1] -> [-1,0,-1]
@@ -394,13 +394,13 @@ describe('Rotation Logic', () => {
     });
 
     describe('Standing layer rotation (S)', () => {
-      it('should rotate standing layer pieces clockwise correctly', () => {
+      it('should rotate standing layer pieces counterclockwise correctly', () => {
         // Move pieces to standing layer (z = 0)
         mockPieces[0].position = [1, 1, 0];
         mockPieces[1].position = [0, 1, 0];
         mockPieces[2].position = [-1, 1, 0];
         
-        applyRotation(mockPieces, 'S', 'clockwise');
+        applyRotation(mockPieces, 'S', 'counterclockwise');
         
         // Standing layer pieces should be rotated
         expect(mockPieces[0].position).toEqualPosition([1, -1, 0]); // [1,1,0] -> [1,-1,0]
@@ -411,15 +411,15 @@ describe('Rotation Logic', () => {
         expect(mockPieces[3].position).toEqual([1, 1, -1]);
       });
 
-      it('should rotate standing layer pieces counterclockwise correctly', () => {
+      it('should rotate standing layer pieces clockwise correctly', () => {
         // Move pieces to standing layer (z = 0)
         mockPieces[0].position = [1, 1, 0];
         mockPieces[1].position = [0, 1, 0];
         mockPieces[2].position = [-1, 1, 0];
         
-        applyRotation(mockPieces, 'S', 'counterclockwise');
+        applyRotation(mockPieces, 'S', 'clockwise');
         
-        // Standing layer pieces should be rotated counterclockwise
+        // Standing layer pieces should be rotated clockwise
         expect(mockPieces[0].position).toEqualPosition([-1, 1, 0]); // [1,1,0] -> [-1,1,0]
         expect(mockPieces[1].position).toEqualPosition([-1, 0, 0]); // [0,1,0] -> [-1,0,0]
         expect(mockPieces[2].position).toEqualPosition([-1, -1, 0]); // [-1,1,0] -> [-1,-1,0]
@@ -435,7 +435,7 @@ describe('Rotation Logic', () => {
           rotationHistory: []
         };
         
-        applyRotation([testPiece], 'M', 'clockwise');
+        applyRotation([testPiece], 'M', 'counterclockwise');
         
         // Colors should be rotated (same as R rotation)
         expect(testPiece.colors).toEqual({
@@ -456,7 +456,7 @@ describe('Rotation Logic', () => {
           rotationHistory: []
         };
         
-        applyRotation([testPiece], 'E', 'clockwise');
+        applyRotation([testPiece], 'E', 'counterclockwise');
         
         // Colors should be rotated (E rotation logic)
         expect(testPiece.colors).toEqual({
@@ -477,7 +477,7 @@ describe('Rotation Logic', () => {
           rotationHistory: []
         };
         
-        applyRotation([testPiece], 'S', 'clockwise');
+        applyRotation([testPiece], 'S', 'counterclockwise');
         
         // Colors should be rotated (same as F rotation)
         expect(testPiece.colors).toEqual({
@@ -495,19 +495,19 @@ describe('Rotation Logic', () => {
       it('should apply correct 90-degree rotation transformations', () => {
         // Test that rotations are mathematically correct
         const testCases = [
-          { face: 'F', direction: 'clockwise', input: [1, 1, 1], expected: [-1, 1, 1] },
-          { face: 'F', direction: 'counterclockwise', input: [1, 1, 1], expected: [1, -1, 1] },
-          { face: 'R', direction: 'clockwise', input: [1, 1, 1], expected: [1, -1, 1] },
-          { face: 'R', direction: 'counterclockwise', input: [1, 1, 1], expected: [1, 1, -1] },
-          { face: 'U', direction: 'clockwise', input: [1, 1, 1], expected: [1, 1, -1] },
-          { face: 'U', direction: 'counterclockwise', input: [1, 1, 1], expected: [-1, 1, 1] },
+          { face: 'F', direction: 'counterclockwise', input: [1, 1, 1], expected: [-1, 1, 1] },
+          { face: 'F', direction: 'clockwise', input: [1, 1, 1], expected: [1, -1, 1] },
+          { face: 'R', direction: 'counterclockwise', input: [1, 1, 1], expected: [1, -1, 1] },
+          { face: 'R', direction: 'clockwise', input: [1, 1, 1], expected: [1, 1, -1] },
+          { face: 'U', direction: 'counterclockwise', input: [1, 1, 1], expected: [1, 1, -1] },
+          { face: 'U', direction: 'clockwise', input: [1, 1, 1], expected: [-1, 1, 1] },
           // Middle rotation test cases
-          { face: 'M', direction: 'clockwise', input: [0, 1, 1], expected: [0, -1, 1] },
-          { face: 'M', direction: 'counterclockwise', input: [0, 1, 1], expected: [0, 1, -1] },
-          { face: 'E', direction: 'clockwise', input: [1, 0, 1], expected: [1, 0, -1] },
-          { face: 'E', direction: 'counterclockwise', input: [1, 0, 1], expected: [-1, 0, 1] },
-          { face: 'S', direction: 'clockwise', input: [1, 1, 0], expected: [1, -1, 0] },
-          { face: 'S', direction: 'counterclockwise', input: [1, 1, 0], expected: [-1, 1, 0] }
+          { face: 'M', direction: 'counterclockwise', input: [0, 1, 1], expected: [0, -1, 1] },
+          { face: 'M', direction: 'clockwise', input: [0, 1, 1], expected: [0, 1, -1] },
+          { face: 'E', direction: 'counterclockwise', input: [1, 0, 1], expected: [1, 0, -1] },
+          { face: 'E', direction: 'clockwise', input: [1, 0, 1], expected: [-1, 0, 1] },
+          { face: 'S', direction: 'counterclockwise', input: [1, 1, 0], expected: [1, -1, 0] },
+          { face: 'S', direction: 'clockwise', input: [1, 1, 0], expected: [-1, 1, 0] }
         ];
 
         testCases.forEach(({ face, direction, input, expected }) => {

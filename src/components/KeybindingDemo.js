@@ -79,7 +79,7 @@ function KeybindingDemo() {
         {currentKeybindings.map(({ key, face, direction }) => (
           <KeybindingItem key={`${face}-${direction}`}>
             <FaceName>
-              {face} {direction === 'clockwise' ? '' : "'"}
+              {face} {direction === 'counterclockwise' ? '' : "'"}
             </FaceName>
             <KeyName>
               {getKeyDisplayName(key)}

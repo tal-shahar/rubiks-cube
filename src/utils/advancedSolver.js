@@ -216,7 +216,7 @@ export class AdvancedSolver {
       // Convert move history to standard notation
       const scrambleSequence = moveHistory.map(move => {
         const face = move.face;
-        const direction = move.direction === 'counterclockwise' ? "'" : 
+        const direction = move.direction === 'clockwise' ? "'" : 
                         move.direction === 'double' ? '2' : '';
         return face + direction;
       });
@@ -229,7 +229,7 @@ export class AdvancedSolver {
         } else if (move.endsWith('2')) {
           return move; // Double moves stay the same
     } else {
-          return move + "'"; // Add prime to clockwise moves
+          return move + "'"; // Add prime to counterclockwise moves
         }
       });
       
@@ -841,7 +841,7 @@ export class AdvancedSolver {
         piece.position[1] = z;
         piece.position[2] = -y;
       } else if (direction === "'") {
-        // Counter-clockwise: (y, z) -> (-z, y)
+        // Counter-counterclockwise: (y, z) -> (-z, y)
         piece.position[1] = -z;
         piece.position[2] = y;
       } else if (direction === '2') {
@@ -868,7 +868,7 @@ export class AdvancedSolver {
         piece.position[1] = -z;
         piece.position[2] = y;
       } else if (direction === "'") {
-        // Counter-clockwise: (y, z) -> (z, -y)
+        // Counter-counterclockwise: (y, z) -> (z, -y)
         piece.position[1] = z;
         piece.position[2] = -y;
       } else if (direction === '2') {
@@ -895,7 +895,7 @@ export class AdvancedSolver {
         piece.position[0] = z;
         piece.position[2] = -x;
       } else if (direction === "'") {
-        // Counter-clockwise: (x, z) -> (-z, x)
+        // Counter-counterclockwise: (x, z) -> (-z, x)
         piece.position[0] = -z;
         piece.position[2] = x;
       } else if (direction === '2') {
@@ -922,7 +922,7 @@ export class AdvancedSolver {
         piece.position[0] = -z;
         piece.position[2] = x;
       } else if (direction === "'") {
-        // Counter-clockwise: (x, z) -> (z, -x)
+        // Counter-counterclockwise: (x, z) -> (z, -x)
         piece.position[0] = z;
         piece.position[2] = -x;
       } else if (direction === '2') {
@@ -949,7 +949,7 @@ export class AdvancedSolver {
         piece.position[0] = y;
         piece.position[1] = -x;
       } else if (direction === "'") {
-        // Counter-clockwise: (x, y) -> (-y, x)
+        // Counter-counterclockwise: (x, y) -> (-y, x)
         piece.position[0] = -y;
         piece.position[1] = x;
       } else if (direction === '2') {
@@ -976,7 +976,7 @@ export class AdvancedSolver {
         piece.position[0] = -y;
         piece.position[1] = x;
       } else if (direction === "'") {
-        // Counter-clockwise: (x, y) -> (y, -x)
+        // Counter-counterclockwise: (x, y) -> (y, -x)
         piece.position[0] = y;
         piece.position[1] = -x;
       } else if (direction === '2') {
@@ -2837,7 +2837,7 @@ export class AdvancedSolver {
         if (i < solution.length - 2) {
           const move3 = solution[i + 2];
           if (move1 === move2 && move2 === move3) {
-            optimized.push(move1 + "'"); // Convert to counterclockwise
+            optimized.push(move1 + "'"); // Convert to clockwise
             i += 3;
             continue;
           }

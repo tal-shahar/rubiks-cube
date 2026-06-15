@@ -7,9 +7,9 @@ const generateDefaultKeybindings = () => {
   const enabledRotations = getKeybindingRotations();
   
   enabledRotations.forEach(({ face }) => {
-    // Lowercase for clockwise, uppercase for counterclockwise
-    keybindings[face.toLowerCase()] = { face, direction: 'clockwise' };
-    keybindings[face.toUpperCase()] = { face, direction: 'counterclockwise' };
+    // Lowercase for counterclockwise, uppercase for clockwise
+    keybindings[face.toLowerCase()] = { face, direction: 'counterclockwise' };
+    keybindings[face.toUpperCase()] = { face, direction: 'clockwise' };
   });
   
   return keybindings;
@@ -26,8 +26,8 @@ export const AVAILABLE_FACES = getKeybindingRotations().map(({ face, name, color
 }));
 
 export const DIRECTIONS = [
-  { id: 'clockwise', name: 'Clockwise' },
-  { id: 'counterclockwise', name: 'Counter-Clockwise' },
+  { id: 'counterclockwise', name: 'Clockwise' },
+  { id: 'clockwise', name: 'Counter-Clockwise' },
 ];
 
 // Cookie management

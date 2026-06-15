@@ -94,7 +94,7 @@ describe('CubeGroup Component', () => {
   });
 
   it('should handle rotating face correctly', () => {
-    const rotatingFace = { face: 'F', direction: 'clockwise' };
+    const rotatingFace = { face: 'F', direction: 'counterclockwise' };
     const rotationProgress = 0.5;
     
     const props = { 
@@ -122,7 +122,7 @@ describe('CubeGroup Component', () => {
     const faces = ['F', 'B', 'R', 'L', 'U', 'D'];
     
     faces.forEach(face => {
-      const rotatingFace = { face, direction: 'clockwise' };
+      const rotatingFace = { face, direction: 'counterclockwise' };
       const props = { 
         ...defaultProps, 
         rotatingFace, 
@@ -139,7 +139,7 @@ describe('CubeGroup Component', () => {
     progressValues.forEach(progress => {
       const props = { 
         ...defaultProps, 
-        rotatingFace: { face: 'F', direction: 'clockwise' },
+        rotatingFace: { face: 'F', direction: 'counterclockwise' },
         rotationProgress: progress 
       };
       
@@ -198,7 +198,7 @@ describe('CubeGroup Component', () => {
   });
 
   it('should handle different rotation directions', () => {
-    const directions = ['clockwise', 'counterclockwise'];
+    const directions = ['counterclockwise', 'clockwise'];
     
     directions.forEach(direction => {
       const props = { 
@@ -215,7 +215,7 @@ describe('CubeGroup Component', () => {
     const props = { 
       ...defaultProps, 
       isAnimating: true,
-      rotatingFace: { face: 'R', direction: 'counterclockwise' },
+      rotatingFace: { face: 'R', direction: 'clockwise' },
       rotationProgress: 0.8,
       isRotating: true,
       autoRotate: true

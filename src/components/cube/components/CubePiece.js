@@ -122,7 +122,7 @@ export function CubePiece({ position, colors, size = 0.95, pieceId = 0, rotating
     }
 
     const { face, direction } = rotatingFace;
-    const sign = direction === 'clockwise' ? 1 : -1;
+    const sign = direction === 'counterclockwise' ? 1 : -1;
     const angle = (Math.PI / 2) * rotationProgress * sign; // 90 degrees total
 
     switch (face) {

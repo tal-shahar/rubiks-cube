@@ -6,7 +6,7 @@ import { isRotationEnabled, getRotationInfo } from '../utils/rotationConfig';
 
 const ControlsContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 15px;
   justify-content: center;
   align-items: center;
@@ -16,6 +16,16 @@ const ControlsContainer = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  width: 100%;
+`;
+
+const ControlsRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
 `;
 
 const Button = styled.button`
@@ -201,11 +211,33 @@ const SButton = styled(FaceButton)`
 `;
 
 const FaceButtonGroup = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   max-width: 200px;
   margin: 0 auto;
+`;
+
+const FaceButtonRow = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+`;
+
+const ActionButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+`;
+
+const ToggleButtonGroup = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 `;
 
 const Label = styled.h3`
@@ -301,7 +333,7 @@ function Controls({
       .reverse()
       .map(move => ({
         face: move.face,
-        direction: move.direction === 'clockwise' ? 'counterclockwise' : 'clockwise'
+        direction: move.direction === 'counterclockwise' ? 'clockwise' : 'counterclockwise'
       }));
     
     return reverseSequence;
@@ -335,93 +367,107 @@ function Controls({
   return (
     <ControlsContainer>
 
-      <ButtonGroup>
-        <Label>Face Rotations</Label>
-        <FaceButtonGroup>
-          <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
-          <FButton onClick={() => handleFaceRotation('F', 'clockwise')}>F</FButton>
-          <BButton onClick={() => handleFaceRotation('B', 'clockwise')}>B</BButton>
-          <LButton onClick={() => handleFaceRotation('L', 'clockwise')}>L</LButton>
-          <UButton onClick={() => handleFaceRotation('U', 'clockwise')}>U</UButton>
-          <DButton onClick={() => handleFaceRotation('D', 'clockwise')}>D</DButton>
-        </FaceButtonGroup>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <Label>Counter-Clockwise</Label>
-        <FaceButtonGroup>
-          <RButton onClick={() => handleFaceRotation('R', 'counterclockwise')}>R'</RButton>
-          <FButton onClick={() => handleFaceRotation('F', 'counterclockwise')}>F'</FButton>
-          <BButton onClick={() => handleFaceRotation('B', 'counterclockwise')}>B'</BButton>
-          <LButton onClick={() => handleFaceRotation('L', 'counterclockwise')}>L'</LButton>
-          <UButton onClick={() => handleFaceRotation('U', 'counterclockwise')}>U'</UButton>
-          <DButton onClick={() => handleFaceRotation('D', 'counterclockwise')}>D'</DButton>
-        </FaceButtonGroup>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <Label>Middle Rotations</Label>
-        <FaceButtonGroup>
-          <MButton onClick={() => handleFaceRotation('M', 'clockwise')}>M</MButton>
-          <EButton onClick={() => handleFaceRotation('E', 'clockwise')}>E</EButton>
-          <SButton onClick={() => handleFaceRotation('S', 'clockwise')} disabled={!isRotationEnabled('S')}>S</SButton>
-        </FaceButtonGroup>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <Label>Middle Counter-Clockwise</Label>
-        <FaceButtonGroup>
-          <MButton onClick={() => handleFaceRotation('M', 'counterclockwise')}>M'</MButton>
-          <EButton onClick={() => handleFaceRotation('E', 'counterclockwise')}>E'</EButton>
-          <SButton onClick={() => handleFaceRotation('S', 'counterclockwise')} disabled={!isRotationEnabled('S')}>S'</SButton>
-        </FaceButtonGroup>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <ActionButton 
-          onClick={handleReset}
-          disabled={cubeIsAnimating}
-        >
-          {cubeIsAnimating ? 'Resetting...' : 'Reset'}
-        </ActionButton>
-        <ActionButton 
-          onClick={handleScramble}
-          disabled={cubeIsAnimating}
-        >
-          {cubeIsAnimating ? 'Scrambling...' : 'Scramble'}
-        </ActionButton>
-        <ActionButton 
-          onClick={handleSolve}
-          disabled={cubeIsAnimating}
-        >
-          {cubeIsAnimating ? 'Solving...' : 'Solve'}
-        </ActionButton>
-      </ButtonGroup>
-
-      <ButtonGroup>
-        <ToggleButton
-          $active={autoRotate}
-          onClick={() => setAutoRotate(!autoRotate)}
-        >
-          Auto Rotate: {autoRotate ? 'ON' : 'OFF'}
-        </ToggleButton>
-        <ToggleButton
-          $active={isRotating}
-          onClick={() => setIsRotating(!isRotating)}
-        >
-          Manual Rotate: {isRotating ? 'ON' : 'OFF'}
-        </ToggleButton>
-      </ButtonGroup>
-
-      {isKeyboardDevice && (
+      <ControlsRow>
         <ButtonGroup>
+          <Label>Face Rotations (Clockwise)</Label>
+          <FaceButtonGroup>
+            <FaceButtonRow>
+              <RButton onClick={() => handleFaceRotation('R', 'clockwise')}>R</RButton>
+              <FButton onClick={() => handleFaceRotation('F', 'clockwise')}>F</FButton>
+              <BButton onClick={() => handleFaceRotation('B', 'clockwise')}>B</BButton>
+            </FaceButtonRow>
+            <FaceButtonRow>
+              <LButton onClick={() => handleFaceRotation('L', 'clockwise')}>L</LButton>
+              <UButton onClick={() => handleFaceRotation('U', 'clockwise')}>U</UButton>
+              <DButton onClick={() => handleFaceRotation('D', 'clockwise')}>D</DButton>
+            </FaceButtonRow>
+          </FaceButtonGroup>
+        </ButtonGroup>
+
+        <ButtonGroup>
+          <Label>Face Rotations (Counter-Clockwise)</Label>
+          <FaceButtonGroup>
+            <FaceButtonRow>
+              <RButton onClick={() => handleFaceRotation('R', 'counterclockwise')}>R'</RButton>
+              <FButton onClick={() => handleFaceRotation('F', 'counterclockwise')}>F'</FButton>
+              <BButton onClick={() => handleFaceRotation('B', 'counterclockwise')}>B'</BButton>
+            </FaceButtonRow>
+            <FaceButtonRow>
+              <LButton onClick={() => handleFaceRotation('L', 'counterclockwise')}>L'</LButton>
+              <UButton onClick={() => handleFaceRotation('U', 'counterclockwise')}>U'</UButton>
+              <DButton onClick={() => handleFaceRotation('D', 'counterclockwise')}>D'</DButton>
+            </FaceButtonRow>
+          </FaceButtonGroup>
+        </ButtonGroup>
+
+        <ButtonGroup>
+          <Label>Middle Rotations (Clockwise)</Label>
+          <FaceButtonGroup>
+            <FaceButtonRow>
+              <MButton onClick={() => handleFaceRotation('M', 'clockwise')}>M</MButton>
+              <EButton onClick={() => handleFaceRotation('E', 'clockwise')}>E</EButton>
+              <SButton onClick={() => handleFaceRotation('S', 'clockwise')} disabled={!isRotationEnabled('S')}>S</SButton>
+            </FaceButtonRow>
+          </FaceButtonGroup>
+        </ButtonGroup>
+
+        <ButtonGroup>
+          <Label>Middle Rotations (Counter-Clockwise)</Label>
+          <FaceButtonGroup>
+            <FaceButtonRow>
+              <MButton onClick={() => handleFaceRotation('M', 'counterclockwise')}>M'</MButton>
+              <EButton onClick={() => handleFaceRotation('E', 'counterclockwise')}>E'</EButton>
+              <SButton onClick={() => handleFaceRotation('S', 'counterclockwise')} disabled={!isRotationEnabled('S')}>S'</SButton>
+            </FaceButtonRow>
+          </FaceButtonGroup>
+        </ButtonGroup>
+      </ControlsRow>
+
+      <ControlsRow>
+        <ActionButtonGroup>
+          <ActionButton 
+            onClick={handleReset}
+            disabled={cubeIsAnimating}
+          >
+            {cubeIsAnimating ? 'Resetting...' : 'Reset'}
+          </ActionButton>
+          <ActionButton 
+            onClick={handleScramble}
+            disabled={cubeIsAnimating}
+          >
+            {cubeIsAnimating ? 'Scrambling...' : 'Scramble'}
+          </ActionButton>
+          <ActionButton 
+            onClick={handleSolve}
+            disabled={cubeIsAnimating}
+          >
+            {cubeIsAnimating ? 'Solving...' : 'Solve'}
+          </ActionButton>
+        </ActionButtonGroup>
+
+        <ToggleButtonGroup>
+          <ToggleButton
+            $active={autoRotate}
+            onClick={() => setAutoRotate(!autoRotate)}
+          >
+            Auto Rotate: {autoRotate ? 'ON' : 'OFF'}
+          </ToggleButton>
+          <ToggleButton
+            $active={isRotating}
+            onClick={() => setIsRotating(!isRotating)}
+          >
+            Manual Rotate: {isRotating ? 'ON' : 'OFF'}
+          </ToggleButton>
+        </ToggleButtonGroup>
+
+        {isKeyboardDevice && (
           <SettingsButton 
             onClick={onOpenKeybindingModal}
           >
             ⚙️ Customize Keys
           </SettingsButton>
-        </ButtonGroup>
-      )}
+        )}
+      </ControlsRow>
 
       <SolverInfo>
         <Label>🧩 Advanced Solver</Label>

@@ -21,7 +21,7 @@ const simpleRevertSolver = (moveHistory) => {
     .reverse()
     .map(move => ({
       face: move.face,
-      direction: move.direction === 'clockwise' ? 'counterclockwise' : 'clockwise'
+      direction: move.direction === 'counterclockwise' ? 'clockwise' : 'counterclockwise'
     }));
   
   return reverseSequence;
@@ -158,7 +158,7 @@ const ComparisonCube = ({
     
     try {
       const moves = getScrambleRotations();
-      const directions = ['clockwise', 'counterclockwise'];
+      const directions = ['counterclockwise', 'clockwise'];
       const scrambleSequence = [];
       
       // Generate 15 random moves

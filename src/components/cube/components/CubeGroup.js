@@ -156,7 +156,7 @@ export function CubeGroup({
     }
 
     const { face, direction } = rotatingFace;
-    const sign = direction === 'clockwise' ? 1 : -1;
+    const sign = direction === 'counterclockwise' ? 1 : -1;
     const angle = (Math.PI / 2) * rotationProgress * sign; // 90 degrees total
 
     // Only log rotation angle calculation when there's actual rotation progress

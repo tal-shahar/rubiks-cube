@@ -59,11 +59,11 @@ describe('Keybinding utilities', () => {
   describe('mergeKeybindings', () => {
     test('should merge user keybindings with defaults', () => {
       const userKeybindings = {
-        'x': { face: 'R', direction: 'clockwise' }
+        'x': { face: 'R', direction: 'counterclockwise' }
       };
       const result = mergeKeybindings(userKeybindings);
       
-      expect(result['x']).toEqual({ face: 'R', direction: 'clockwise' });
+      expect(result['x']).toEqual({ face: 'R', direction: 'counterclockwise' });
       expect(result['r']).toEqual(DEFAULT_KEYBINDINGS['r']); // Default should still exist
     });
   });
@@ -71,8 +71,8 @@ describe('Keybinding utilities', () => {
   describe('findKeybindingConflicts', () => {
     test('should find conflicts', () => {
       const keybindings = {
-        'r': { face: 'R', direction: 'clockwise' },
-        'x': { face: 'L', direction: 'clockwise' }
+        'r': { face: 'R', direction: 'counterclockwise' },
+        'x': { face: 'L', direction: 'counterclockwise' }
       };
       
       const conflicts = findKeybindingConflicts(keybindings, 'r');
@@ -82,7 +82,7 @@ describe('Keybinding utilities', () => {
 
     test('should not find conflicts when excluding key', () => {
       const keybindings = {
-        'r': { face: 'R', direction: 'clockwise' }
+        'r': { face: 'R', direction: 'counterclockwise' }
       };
       
       const conflicts = findKeybindingConflicts(keybindings, 'r', 'r');

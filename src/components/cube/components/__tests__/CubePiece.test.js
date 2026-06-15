@@ -58,7 +58,7 @@ describe('CubePiece Component', () => {
 
 
   it('should render with rotating face', () => {
-    const rotatingFace = { face: 'F', direction: 'clockwise' };
+    const rotatingFace = { face: 'F', direction: 'counterclockwise' };
     const props = { 
       ...defaultProps, 
       rotatingFace, 
@@ -116,7 +116,7 @@ describe('CubePiece Component', () => {
     progressValues.forEach(progress => {
       const props = { 
         ...defaultProps, 
-        rotatingFace: { face: 'F', direction: 'clockwise' },
+        rotatingFace: { face: 'F', direction: 'counterclockwise' },
         rotationProgress: progress 
       };
       expect(() => render(<CubePiece {...props} />)).not.toThrow();
@@ -125,7 +125,7 @@ describe('CubePiece Component', () => {
 
   it('should handle different rotating faces', () => {
     const faces = ['F', 'B', 'R', 'L', 'U', 'D'];
-    const directions = ['clockwise', 'counterclockwise'];
+    const directions = ['counterclockwise', 'clockwise'];
     
     faces.forEach(face => {
       directions.forEach(direction => {
@@ -187,7 +187,7 @@ describe('CubePiece Component', () => {
       },
       size: 1.2,
       pieceId: 15,
-      rotatingFace: { face: 'R', direction: 'counterclockwise' },
+      rotatingFace: { face: 'R', direction: 'clockwise' },
       rotationProgress: 0.8
     };
 

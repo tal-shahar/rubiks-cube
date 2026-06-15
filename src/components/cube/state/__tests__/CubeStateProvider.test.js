@@ -248,7 +248,7 @@ describe('CubeStateProvider', () => {
         </CubeStateProvider>
       );
       
-      const rotatingFace = { face: 'F', direction: 'clockwise' };
+      const rotatingFace = { face: 'F', direction: 'counterclockwise' };
       
       act(() => {
         stateProps.setRotatingFace(rotatingFace);
@@ -290,7 +290,7 @@ describe('CubeStateProvider', () => {
         </CubeStateProvider>
       );
       
-      const newHistory = [{ face: 'F', direction: 'clockwise', timestamp: Date.now() }];
+      const newHistory = [{ face: 'F', direction: 'counterclockwise', timestamp: Date.now() }];
       
       act(() => {
         stateProps.setMoveHistory(newHistory);
@@ -361,7 +361,7 @@ describe('CubeStateProvider', () => {
       // Multiple state updates
       act(() => {
         stateProps.setIsAnimating(true);
-        stateProps.setRotatingFace({ face: 'F', direction: 'clockwise' });
+        stateProps.setRotatingFace({ face: 'F', direction: 'counterclockwise' });
         stateProps.setRotationProgress(0.3);
         stateProps.setCubeState(prevState => {
           const newState = [...prevState];
@@ -371,7 +371,7 @@ describe('CubeStateProvider', () => {
       });
       
       expect(stateProps.isAnimating).toBe(true);
-      expect(stateProps.rotatingFace).toEqual({ face: 'F', direction: 'clockwise' });
+      expect(stateProps.rotatingFace).toEqual({ face: 'F', direction: 'counterclockwise' });
       expect(stateProps.rotationProgress).toBe(0.3);
       expect(stateProps.cubeState[0].position).toEqual([1, 2, 3]);
     });

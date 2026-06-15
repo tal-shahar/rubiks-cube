@@ -147,7 +147,7 @@ function RubiksCubeScene({
     console.log(`🎲 SCRAMBLING CUBE - Current move history: ${moveHistory.length} moves`);
 
     const moves = getScrambleRotations();
-    const directions = ['clockwise', 'counterclockwise'];
+    const directions = ['counterclockwise', 'clockwise'];
     const scrambleSequence = [];
     const sharedSeed = Math.floor(Date.now() / 1000);
     let seed = sharedSeed;
@@ -252,7 +252,7 @@ function RubiksCubeScene({
       .reverse()
       .map(move => ({
         face: move.face,
-        direction: move.direction === 'clockwise' ? 'counterclockwise' : 'clockwise',
+        direction: move.direction === 'counterclockwise' ? 'clockwise' : 'counterclockwise',
       }));
   };
 
@@ -360,10 +360,10 @@ function RubiksCubeScene({
         const solveSequence = solverResult.solution.map(move => {
           const face = move[0];
           const direction = move.endsWith("'")
-            ? 'counterclockwise'
+            ? 'clockwise'
             : move.endsWith('2')
               ? 'double'
-              : 'clockwise';
+              : 'counterclockwise';
           return { face, direction };
         });
 
